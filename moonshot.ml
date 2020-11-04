@@ -68,6 +68,16 @@ module Player = struct
   }
 end
 
+module Enemy = struct
+  type action =
+    | Standing
+    | Dead
+
+  type t = {
+      loc : Body.moving;
+    }
+end
+
 let explosion_time = 1.0
 let explosion_from_body x =
   let open Body in
@@ -79,6 +89,7 @@ module Model = struct
       bullets : Body.moving list;
       fading : Body.fading list;
       player : Player.t;
+      enemies : Enemy.t list;
     }
 end
 
@@ -97,9 +108,14 @@ let setup () =
        vel=Vector2.create 0.0 15.0}
         (* {Body.pos=Vector2.create 30.0 0.0; mass=100.0; radius=5.0;}; *)
     ] in
+  let enemies = [
+      {Enemy.loc={Body.body={Body.pos=Vector2.create 30.0 (-6.0); mass=1.0; radius=1.0;};
+            vel=Vector2.create 0.0 0.0}}
+    ] in
   let vc = Vector2.create in
   { Model.static=bodies;
     fading=[];
+    enemies;
     player={
       Player.feet={Body.body={pos=vc (-30.0) 0.0; mass=  10.0; radius=0.5;}; vel=vc 1.0 0.0};
       Player.head={Body.body={pos=vc (-30.0) 1.0; mass= -3.5; radius=0.5;}; vel=vc (-1.0) 0.0};
@@ -181,27 +197,16 @@ let rotate theta (x, y) =
   let y' = -.(x *. Float.sin theta) +. (y *. Float.cos theta) in
   (x', y')
 
-
-let update_player delta bodies player =
-  let {Player.head=float; feet=base; input=inp} = player in
-  (* player is like a balloon attached to a rock at a fixed distance *)
+let update_planet_collidable ?(inp=None) delta bodies base =
   let open Body in
 
   (* Calculate forces *)
   let (b_fx, b_fy) = gravity_from_many base.body bodies in
   let (b_accx, b_accy) = (b_fx /. base.body.mass, b_fy /. base.body.mass) in
-  let new_b = accelerate_moving_body delta base (b_accx, b_accy) in
-  let new_f = float in
+  let b = accelerate_moving_body delta base (b_accx, b_accy) in
 
-  let gravity_dir = -.Float.pi /.2.0  -. Float.atan2 b_fx b_fy in
-  let seperation = 1.0 in
-  Vector2.set_x new_f.body.pos ((Vector2.x new_b.body.pos) +. seperation *. Float.cos gravity_dir);
-  Vector2.set_y new_f.body.pos ((Vector2.y new_b.body.pos) +. seperation *. Float.sin gravity_dir);
-
-  (* Planet Collision *)
-  let b = new_b in
-  (match List.find_opt (fun b2 -> bodies_touch b.body b2) bodies with
-  | None -> ()
+  let b' = (match List.find_opt (fun b2 -> bodies_touch b.body b2) bodies with
+  | None -> b
   | Some planet ->
      let e = 0.5 in
      let (vx, vy) = vector b.vel in
@@ -212,20 +217,27 @@ let update_player delta bodies player =
 
      let (vpar, vper) = rotate_forward (vx, vy) in
      let vpar = -.e *. vpar in
-     (* player controls *)
-     let input_force = 2.0 in
-     let jump_force = 20.0 in
-     let (vpar, vper) = match inp with
-       | Player.CW -> (vpar, vper +. input_force)
-       | Player.CCW -> (vpar, vper -. input_force)
-       | Player.Jump -> (vpar -. jump_force, vper)
-       | _ -> (vpar, vper) in
 
-     let (new_vx, new_vy) = rotate_back (vpar, vper) in
+     (* TODO: player controls *)
+     let input_force = 2.0 in
+     let jump_force = 18.0 in
+     let (vpar, vper) = match inp with
+     | None -> (vpar, vper)
+     | Some inp ->
+        match inp with
+        | Player.CW -> (vpar, vper +. input_force)
+        | Player.CCW -> (vpar, vper -. input_force)
+        | Player.Jump -> (vpar -. jump_force, vper)
+        | _ -> (vpar, vper)
+     in
 
      (* Friction *)
      let friction = 0.90 in
-     let (new_vx, new_vy) = (new_vx *. friction, new_vy *. friction) in
+     let vper = friction *. vper in
+     let vper = if (Float.abs vper) < 1.5 then 0.0 else vper in
+
+     let (new_vx, new_vy) = rotate_back (vpar, vper) in
+
 
      let (px, py) = vector planet.pos in
      let (x, y) = vector b.body.pos in
@@ -234,12 +246,29 @@ let update_player delta bodies player =
      let new_x = px +. radius *. Float.cos theta in
      let new_y = py +. radius *. Float.sin theta in
 
-     Vector2.set_x b.body.pos new_x;
-     Vector2.set_y b.body.pos new_y;
-     Vector2.set_x b.vel new_vx;
-     Vector2.set_y b.vel new_vy);
+     let pos = Vector2.create new_x new_y in
+     let vel = Vector2.create new_vx new_vy in
+     {vel; body={b.body with pos}}) in
+
+  (b', (b_fx, b_fy))
+
+let update_player delta bodies player =
+  let {Player.head=float; feet=base; input} = player in
+  (* player is like a balloon attached to a rock at a fixed distance *)
+  let open Body in
+
+  (* Calculate new base *)
+  let (new_b, (b_fx, b_fy)) = update_planet_collidable ~inp:(Some input) delta bodies base in
+  let new_f = float in
+
+  (* Calculate new float *)
+  let gravity_dir = -.Float.pi /.2.0  -. Float.atan2 b_fx b_fy in
+  let seperation = 1.0 in
+  Vector2.set_x new_f.body.pos ((Vector2.x new_b.body.pos) +. seperation *. Float.cos gravity_dir);
+  Vector2.set_y new_f.body.pos ((Vector2.y new_b.body.pos) +. seperation *. Float.sin gravity_dir);
 
   {player with Player.head=new_f; feet=new_b}
+
 let truncate_aim ax ay px py =
   let aim_length = 10.0 in
   let dx = ax -. px in
@@ -270,10 +299,15 @@ let create_player_bullets player =
        [create_bullet_from_aim ax ay player.head]
     | _ -> []
 
+let update_enemies delta bodies enemies =
+  let open Enemy in
+  let update_enemy e = let (loc, _) = update_planet_collidable delta bodies e.loc in {loc} in
+  List.map update_enemy enemies
+
 
 let update delta model =
   let open Body in
-  let { Model.bullets=movables; static=bodies; fading=fading; player=player } = model in
+  let { Model.bullets=movables; static=bodies; fading=fading; player=player; enemies } = model in
   let fading = List.map (fun x -> { x with remaining =  x.remaining -. delta}) fading in
   let fading = List.filter (fun x -> x.remaining > 0.0) fading in
   let movables = List.map (update_body delta bodies) movables in
@@ -284,7 +318,8 @@ let update delta model =
   let player = update_player delta bodies player in
   let player_bullets = create_player_bullets player in
   let new_bullets = List.concat [alive; player_bullets] in
-  { model with bullets=new_bullets; fading=fading; player=player}
+  let enemies = update_enemies delta bodies enemies in
+  { model with bullets=new_bullets; fading; player; enemies}
 
 let draw_body color b =
   let open Body in
@@ -346,7 +381,7 @@ let draw_aim_assist bodies dots freq ax ay player =
 
 let draw model =
   let { Model.bullets=movables; static=bodies; fading=fading;
-        player={feet=pfeet; head=phead; input=inp} } = model in
+        player={feet=pfeet; head=phead; input=inp}; enemies } = model in
   let player = model.player in
   begin_drawing ();
   clear_background Color.raywhite;
@@ -355,6 +390,7 @@ let draw model =
   List.iter draw_explosion fading;
   List.iter (draw_body Color.lime) @@
     List.map (fun x -> let open Body in x.body) [phead; pfeet];
+  List.iter (fun x -> let open Enemy in draw_body Color.blue x.loc.body) enemies;
   (match inp with
    | Player.Aiming (ax, ay) ->
       draw_aim_assist bodies 5 0.15 ax ay player;
