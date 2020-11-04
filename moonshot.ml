@@ -14,7 +14,7 @@ let screen_of_world w =
   int_of_float (w *. pixels_per_meter)
 
 let world_of_screen p =
-   (float_of_int p) *. meters_per_pixel
+  (float_of_int p) *. meters_per_pixel
 
 let screen_of_world_vector v =
   let x = (screen_of_world @@ Vector2.x v) + screen_width / 2 in
@@ -65,7 +65,7 @@ module Player = struct
       head : Body.moving;
       feet : Body.moving;
       input: input_type;
-  }
+    }
 end
 
 module Enemy = struct
@@ -98,30 +98,30 @@ let setup () =
   init_window screen_width screen_height "test1";
   set_target_fps 60;
 
+  let vc = Vector2.create in
   let bodies = [
-      {Body.pos=Vector2.create 0.0 0.0; mass=900.0; radius=10.0;};
-      {Body.pos=Vector2.create 30.0 0.0; mass=300.0; radius=5.0;};
-      (* {Body.pos=Vector2.create 40.0 0.0; mass= -200.0; radius=1.0;}; *)
+      {Body.pos=vc 0.0 0.0; mass=900.0; radius=10.0;};
+      {Body.pos=vc 30.0 0.0; mass=300.0; radius=5.0;};
+      (* {Body.pos=vc 40.0 0.0; mass= -200.0; radius=1.0;}; *)
     ] in
 
   let movables = [
-      {Body.body={Body.pos=Vector2.create (-30.0) 0.0; mass=1.0; radius=0.5;};
-       vel=Vector2.create 0.0 15.0}
-        (* {Body.pos=Vector2.create 30.0 0.0; mass=100.0; radius=5.0;}; *)
+      {Body.body={Body.pos=vc (-30.0) 0.0; mass=1.0; radius=0.5;};
+       vel=vc 0.0 15.0}
+        (* {Body.pos=vc 30.0 0.0; mass=100.0; radius=5.0;}; *)
     ] in
   let enemies = [
-      {Enemy.loc={Body.body={Body.pos=Vector2.create 30.0 (-6.0); mass=1.0; radius=1.0;};
-            vel=Vector2.create 0.0 0.0}; action=Standing}
+      {Enemy.loc={Body.body={Body.pos=vc 30.0 (-6.0); mass=1.0; radius=1.0;};
+                  vel=vc 0.0 0.0}; action=Standing}
     ] in
-  let vc = Vector2.create in
   { Model.static=bodies;
     fading=[];
     enemies;
     player={
-      Player.feet={Body.body={pos=vc (-30.0) 0.0; mass=  10.0; radius=0.5;}; vel=vc 1.0 0.0};
-      Player.head={Body.body={pos=vc (-30.0) 1.0; mass= -3.5; radius=0.5;}; vel=vc (-1.0) 0.0};
-      input=Player.None
-    };
+        Player.feet={Body.body={pos=vc (-30.0) 0.0; mass=  10.0; radius=0.5;}; vel=vc 1.0 0.0};
+        Player.head={Body.body={pos=vc (-30.0) 1.0; mass= -3.5; radius=0.5;}; vel=vc (-1.0) 0.0};
+        input=Player.None
+      };
     bullets=movables }
 
 
@@ -207,49 +207,49 @@ let update_planet_collidable ?(inp=None) delta bodies base =
   let b = accelerate_moving_body delta base (b_accx, b_accy) in
 
   let b' = (match List.find_opt (fun b2 -> bodies_touch b.body b2) bodies with
-  | None -> b
-  | Some planet ->
-     let e = 0.5 in
-     let (vx, vy) = vector b.vel in
+            | None -> b
+            | Some planet ->
+               let e = 0.5 in
+               let (vx, vy) = vector b.vel in
 
-     let normal_dir = angle_from_vectors b.body.pos planet.pos in
-     let rotate_forward = rotate normal_dir in
-     let rotate_back = rotate @@ -. normal_dir in
+               let normal_dir = angle_from_vectors b.body.pos planet.pos in
+               let rotate_forward = rotate normal_dir in
+               let rotate_back = rotate @@ -. normal_dir in
 
-     let (vpar, vper) = rotate_forward (vx, vy) in
-     let vpar = -.e *. vpar in
+               let (vpar, vper) = rotate_forward (vx, vy) in
+               let vpar = -.e *. vpar in
 
-     (* TODO: player controls *)
-     let input_force = 2.0 in
-     let jump_force = 18.0 in
-     let (vpar, vper) = match inp with
-     | None -> (vpar, vper)
-     | Some inp ->
-        match inp with
-        | Player.CW -> (vpar, vper +. input_force)
-        | Player.CCW -> (vpar, vper -. input_force)
-        | Player.Jump -> (vpar -. jump_force, vper)
-        | _ -> (vpar, vper)
-     in
+               (* TODO: player controls *)
+               let input_force = 2.0 in
+               let jump_force = 18.0 in
+               let (vpar, vper) = match inp with
+                 | None -> (vpar, vper)
+                 | Some inp ->
+                    match inp with
+                    | Player.CW -> (vpar, vper +. input_force)
+                    | Player.CCW -> (vpar, vper -. input_force)
+                    | Player.Jump -> (vpar -. jump_force, vper)
+                    | _ -> (vpar, vper)
+               in
 
-     (* Friction *)
-     let friction = 0.90 in
-     let vper = friction *. vper in
-     let vper = if (Float.abs vper) < 1.5 then 0.0 else vper in
+               (* Friction *)
+               let friction = 0.90 in
+               let vper = friction *. vper in
+               let vper = if (Float.abs vper) < 1.5 then 0.0 else vper in
 
-     let (new_vx, new_vy) = rotate_back (vpar, vper) in
+               let (new_vx, new_vy) = rotate_back (vpar, vper) in
 
 
-     let (px, py) = vector planet.pos in
-     let (x, y) = vector b.body.pos in
-     let theta = Float.atan2 (y -. py) (x -. px) in
-     let radius = b.body.radius +. planet.radius in
-     let new_x = px +. radius *. Float.cos theta in
-     let new_y = py +. radius *. Float.sin theta in
+               let (px, py) = vector planet.pos in
+               let (x, y) = vector b.body.pos in
+               let theta = Float.atan2 (y -. py) (x -. px) in
+               let radius = b.body.radius +. planet.radius in
+               let new_x = px +. radius *. Float.cos theta in
+               let new_y = py +. radius *. Float.sin theta in
 
-     let pos = Vector2.create new_x new_y in
-     let vel = Vector2.create new_vx new_vy in
-     {vel; body={b.body with pos}}) in
+               let pos = Vector2.create new_x new_y in
+               let vel = Vector2.create new_vx new_vy in
+               {vel; body={b.body with pos}}) in
 
   (b', (b_fx, b_fy))
 
@@ -291,14 +291,14 @@ let create_bullet_from_aim ax ay head =
   let scale = 5.0 in
   let vel = Vector2.create (scale *. dx) (scale *. dy) in
   {Body.body={Body.pos=Vector2.create px py; mass=1.0; radius=0.5;};
-    vel=vel}
+   vel=vel}
 
 let create_player_bullets player =
   let open Player in
   match player.input with
-    | Player.Fire (ax, ay) ->
-       [create_bullet_from_aim ax ay player.head]
-    | _ -> []
+  | Player.Fire (ax, ay) ->
+     [create_bullet_from_aim ax ay player.head]
+  | _ -> []
 
 let update_enemies delta bodies fading enemies =
   let open Enemy in
@@ -308,8 +308,8 @@ let update_enemies delta bodies fading enemies =
   let enemies = List.map (fun x -> if in_any_explosion x then (* check if dead *)
                                      {x with action=Dead 2.0} else x) enemies in
   let enemies = List.map (fun x -> {x with action=(match x.action with (* update death time *)
-                                   | Dead y -> Dead (y -. delta)
-                                   | _ -> x.action)}) enemies in
+                                                   | Dead y -> Dead (y -. delta)
+                                                   | _ -> x.action)}) enemies in
   let enemies = List.filter (fun x -> match x.action with (* remove long dead bodies *)
                                       | Dead y -> y > 0.0
                                       | _ -> true) enemies in
@@ -395,8 +395,8 @@ let draw_aim_assist bodies dots freq ax ay player =
 let draw_enemy e =
   let open Enemy in
   let c = match e.action with
-  | Dead _ -> Color.darkblue
-  | _ -> Color.blue in
+    | Dead _ -> Color.darkblue
+    | _ -> Color.blue in
   draw_body c e.loc.body
 
 let draw model =
@@ -426,7 +426,7 @@ let draw model =
 let input_mouse_or_touch _ =
   if true then
     ((is_mouse_button_down MouseButton.Left), get_mouse_position ())
-  (* TODO: detect if mobile, and probably will need a better way for this*)
+      (* TODO: detect if mobile, and probably will need a better way for this*)
   else ((0 < Raylib.get_touch_points_count ()), get_touch_position 0)
 
 let input model =
@@ -447,7 +447,7 @@ let input model =
     else if (match model.player.input with | Player.Aiming _ -> false | _ -> true)
             && touched && (((Float.pow (tx -. px) 2.0) +.
                               (Float.pow (ty -. py) 2.0)) <
-                 touch_catch_size *. touch_catch_size) then
+                             touch_catch_size *. touch_catch_size) then
       Player.Aiming (tx, ty)
     else if (match model.player.input with | Player.Aiming _ -> true | _ -> false)
             && touched then
