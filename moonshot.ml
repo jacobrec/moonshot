@@ -71,10 +71,11 @@ end
 module Enemy = struct
   type action =
     | Standing
-    | Dead
+    | Dead of float
 
   type t = {
       loc : Body.moving;
+      action : action;
     }
 end
 
@@ -110,7 +111,7 @@ let setup () =
     ] in
   let enemies = [
       {Enemy.loc={Body.body={Body.pos=Vector2.create 30.0 (-6.0); mass=1.0; radius=1.0;};
-            vel=Vector2.create 0.0 0.0}}
+            vel=Vector2.create 0.0 0.0}; action=Standing}
     ] in
   let vc = Vector2.create in
   { Model.static=bodies;
@@ -299,15 +300,27 @@ let create_player_bullets player =
        [create_bullet_from_aim ax ay player.head]
     | _ -> []
 
-let update_enemies delta bodies enemies =
+let update_enemies delta bodies fading enemies =
   let open Enemy in
-  let update_enemy e = let (loc, _) = update_planet_collidable delta bodies e.loc in {loc} in
+  let open Body in
+  let in_any_explosion b1 = List.exists (fun b2 -> ignore(b2.remaining);
+                                                   bodies_touch b1.loc.body b2.body) fading in
+  let enemies = List.map (fun x -> if in_any_explosion x then (* check if dead *)
+                                     {x with action=Dead 2.0} else x) enemies in
+  let enemies = List.map (fun x -> {x with action=(match x.action with (* update death time *)
+                                   | Dead y -> Dead (y -. delta)
+                                   | _ -> x.action)}) enemies in
+  let enemies = List.filter (fun x -> match x.action with (* remove long dead bodies *)
+                                      | Dead y -> y > 0.0
+                                      | _ -> true) enemies in
+  let update_enemy e = let (loc, _) = update_planet_collidable delta bodies e.loc in {e with loc} in
   List.map update_enemy enemies
 
 
 let update delta model =
   let open Body in
   let { Model.bullets=movables; static=bodies; fading=fading; player=player; enemies } = model in
+  let bodies = List.concat [List.map (fun x -> ignore (x.remaining); x.body) fading; bodies] in
   let fading = List.map (fun x -> { x with remaining =  x.remaining -. delta}) fading in
   let fading = List.filter (fun x -> x.remaining > 0.0) fading in
   let movables = List.map (update_body delta bodies) movables in
@@ -318,7 +331,7 @@ let update delta model =
   let player = update_player delta bodies player in
   let player_bullets = create_player_bullets player in
   let new_bullets = List.concat [alive; player_bullets] in
-  let enemies = update_enemies delta bodies enemies in
+  let enemies = update_enemies delta bodies fading enemies in
   { model with bullets=new_bullets; fading; player; enemies}
 
 let draw_body color b =
@@ -379,6 +392,13 @@ let draw_aim_assist bodies dots freq ax ay player =
   let every_few = filteri (fun i _ -> i mod (int_of_float (freq /. timing) + 1) = 0) all in
   List.iter (fun x -> let open Body in draw_body Color.gray x.body) every_few
 
+let draw_enemy e =
+  let open Enemy in
+  let c = match e.action with
+  | Dead _ -> Color.darkblue
+  | _ -> Color.blue in
+  draw_body c e.loc.body
+
 let draw model =
   let { Model.bullets=movables; static=bodies; fading=fading;
         player={feet=pfeet; head=phead; input=inp}; enemies } = model in
@@ -390,7 +410,7 @@ let draw model =
   List.iter draw_explosion fading;
   List.iter (draw_body Color.lime) @@
     List.map (fun x -> let open Body in x.body) [phead; pfeet];
-  List.iter (fun x -> let open Enemy in draw_body Color.blue x.loc.body) enemies;
+  List.iter draw_enemy enemies;
   (match inp with
    | Player.Aiming (ax, ay) ->
       draw_aim_assist bodies 5 0.15 ax ay player;
