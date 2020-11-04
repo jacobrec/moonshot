@@ -240,15 +240,29 @@ let update_player delta bodies player =
      Vector2.set_y b.vel new_vy);
 
   {player with Player.head=new_f; feet=new_b}
+let truncate_aim ax ay px py =
+  let aim_length = 10.0 in
+  let dx = ax -. px in
+  let dy = ay -. py in
+  let theta = Float.atan2 dy dx in
+  let len = Float.sqrt (dx *. dx +. dy *. dy) in
+  let truncate = Float.min len aim_length in
+  let ax = px +. truncate *. Float.cos theta in
+  let ay = py +. truncate *. Float.sin theta in
+  (ax, ay)
 
 let create_bullet_from_aim ax ay head =
   let open Body in
   let (px, py) = vector head.body.pos in
+  let (ax, ay) = truncate_aim ax ay px py in
   let dx = px -. ax in
   let dy = py -. ay in
 
+  let scale = 5.0 in
+  let vel = Vector2.create (scale *. dx) (scale *. dy) in
   {Body.body={Body.pos=Vector2.create px py; mass=1.0; radius=0.5;};
-    vel=Vector2.create dx dy}
+    vel=vel}
+
 let create_player_bullets player =
   let open Player in
   match player.input with
@@ -343,7 +357,9 @@ let draw model =
     List.map (fun x -> let open Body in x.body) [phead; pfeet];
   (match inp with
    | Player.Aiming (ax, ay) ->
-      draw_aim_assist bodies 50 0.2 ax ay player;
+      draw_aim_assist bodies 5 0.15 ax ay player;
+      let (px, py) = vector phead.body.pos in
+      let (ax, ay) = truncate_aim ax ay px py in
       let (ax, ay) = sofwv (Vector2.create ax ay) in
       let (px, py) = sofwv phead.body.pos in
       draw_dotted_line Color.gray 10.0 ax ay px py;
