@@ -380,12 +380,21 @@ let input model =
   let jump = is_key_down Key.Space in
   let (touched, tv) = input_mouse_or_touch () in
   let (tx, ty) = wofsv tv in
+  let (px, py) = vector model.player.head.body.pos in
+  let touch_catch_size = 10.0 in
   let inp =
-    if (match model.player.input with | Player.Aiming _ -> true | _ -> false) && not touched then
+    if (match model.player.input with | Player.Aiming _ -> true | _ -> false) &&
+         not touched then
       match model.player.input with
       | Player.Aiming (x, y) -> Player.Fire (x, y)
       | _ -> raise Not_found (*this is checked in the condition*)
-    else if touched then
+    else if (match model.player.input with | Player.Aiming _ -> false | _ -> true)
+            && touched && (((Float.pow (tx -. px) 2.0) +.
+                              (Float.pow (ty -. py) 2.0)) <
+                 touch_catch_size *. touch_catch_size) then
+      Player.Aiming (tx, ty)
+    else if (match model.player.input with | Player.Aiming _ -> true | _ -> false)
+            && touched then
       Player.Aiming (tx, ty)
     else if jump then
       Player.Jump
