@@ -91,6 +91,7 @@ module Model = struct
       fading : Body.fading list;
       player : Player.t;
       enemies : Enemy.t list;
+      cam : Camera2D.t;
     }
 end
 
@@ -117,6 +118,7 @@ let setup () =
   { Model.static=bodies;
     fading=[];
     enemies;
+    cam=Camera2D.create (vc (float_of_int (screen_width / 2)) (float_of_int (screen_height / 2))) (vc 0.0 0.0) 0.0 1.0; (* offset target rotation zoom *)
     player={
         Player.feet={Body.body={pos=vc (-30.0) 0.0; mass=  10.0; radius=0.5;}; vel=vc 1.0 0.0};
         Player.head={Body.body={pos=vc (-30.0) 1.0; mass= -3.5; radius=0.5;}; vel=vc (-1.0) 0.0};
@@ -201,11 +203,7 @@ let rotate theta (x, y) =
 let update_planet_collidable ?(inp=None) delta bodies base =
   let open Body in
 
-  (* Calculate forces *)
-  let (b_fx, b_fy) = gravity_from_many base.body bodies in
-  let (b_accx, b_accy) = (b_fx /. base.body.mass, b_fy /. base.body.mass) in
-  let b = accelerate_moving_body delta base (b_accx, b_accy) in
-
+  let b = base in
   let b' = (match List.find_opt (fun b2 -> bodies_touch b.body b2) bodies with
             | None -> b
             | Some planet ->
@@ -251,7 +249,13 @@ let update_planet_collidable ?(inp=None) delta bodies base =
                let vel = Vector2.create new_vx new_vy in
                {vel; body={b.body with pos}}) in
 
-  (b', (b_fx, b_fy))
+  (* Calculate forces *)
+  let (b_fx, b_fy) = gravity_from_many b'.body bodies in
+  let (b_accx, b_accy) = (b_fx /. b'.body.mass, b_fy /. b'.body.mass) in
+  let b'' = accelerate_moving_body delta b' (b_accx, b_accy) in
+
+
+  (b'', (b_fx, b_fy))
 
 let update_player delta bodies player =
   let {Player.head=float; feet=base; input} = player in
@@ -316,10 +320,25 @@ let update_enemies delta bodies fading enemies =
   let update_enemy e = let (loc, _) = update_planet_collidable delta bodies e.loc in {e with loc} in
   List.map update_enemy enemies
 
+let update_camera cam player =
+  let open Player in
+  let zoom_speed_per_frame = 0.02 in
+  let (x, y) = sofwv player.head.body.pos in
+  let (vx, vy) = vector player.feet.vel in
+  let speed = Float.sqrt (vx *. vx +. vy *. vy) in
+  let clamped = Float.max 0.0 (Float.min 30.0 speed) in
+  let desired_zoom = 1.0 +. (30.0 -. clamped) /. 30.0 in
+  let diff_zoom = desired_zoom -. (Camera2D.zoom cam) in
+  let abs_diff_zoom = Float.abs diff_zoom in
+  let clamped_abs_diff_zoom = Float.min zoom_speed_per_frame abs_diff_zoom in
+  let new_zoom = (Camera2D.zoom cam) +. Float.copy_sign clamped_abs_diff_zoom diff_zoom  in
+  Camera2D.set_target cam (Vector2.create (float_of_int x) (float_of_int y));
+  Camera2D.set_zoom cam new_zoom;
+  cam
 
 let update delta model =
   let open Body in
-  let { Model.bullets=movables; static=bodies; fading=fading; player=player; enemies } = model in
+  let { Model.bullets=movables; static=bodies; fading=fading; player=player; enemies; cam } = model in
   let bodies = List.concat [List.map (fun x -> ignore (x.remaining); x.body) fading; bodies] in
   let fading = List.map (fun x -> { x with remaining =  x.remaining -. delta}) fading in
   let fading = List.filter (fun x -> x.remaining > 0.0) fading in
@@ -332,7 +351,8 @@ let update delta model =
   let player_bullets = create_player_bullets player in
   let new_bullets = List.concat [alive; player_bullets] in
   let enemies = update_enemies delta bodies fading enemies in
-  { model with bullets=new_bullets; fading; player; enemies}
+  let cam = update_camera cam player in
+  { model with bullets=new_bullets; fading; player; enemies; cam}
 
 let draw_body color b =
   let open Body in
@@ -401,9 +421,9 @@ let draw_enemy e =
 
 let draw model =
   let { Model.bullets=movables; static=bodies; fading=fading;
-        player={feet=pfeet; head=phead; input=inp}; enemies } = model in
+        player={feet=pfeet; head=phead; input=inp}; enemies; cam } = model in
   let player = model.player in
-  begin_drawing ();
+  begin_mode_2d cam;
   clear_background Color.raywhite;
   List.iter (draw_body Color.beige) bodies;
   List.iter (fun x -> let open Body in draw_body Color.black x.body) movables;
@@ -435,7 +455,8 @@ let input model =
   let cw = is_key_down Key.S in
   let jump = is_key_down Key.Space in
   let (touched, tv) = input_mouse_or_touch () in
-  let (tx, ty) = wofsv tv in
+  let tv' = get_screen_to_world_2d tv model.cam in
+  let (tx, ty) = wofsv tv' in
   let (px, py) = vector model.player.head.body.pos in
   let touch_catch_size = 10.0 in
   let inp =
