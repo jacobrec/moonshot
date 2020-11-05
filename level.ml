@@ -60,7 +60,7 @@ let level_two _ =
       {Body.is_painful=false;
        body={Body.pos=vc (-15.0) ( 0.0); mass=500.0; radius=7.0;}};
       {Body.is_painful=false;
-       body={Body.pos=vc ( 15.0) ( 15.0); mass=500.0; radius=7.0;}};
+       body={Body.pos=vc ( 15.0) ( 15.0); mass=500.0; radius=2.0;}};
       {Body.is_painful=true;
        body={Body.pos=vc ( 15.0) (-15.0); mass=400.0; radius=7.0;}};
     ] in
