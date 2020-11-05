@@ -7,11 +7,12 @@ let input_mouse_or_touch _ =
       (* TODO: detect if mobile, and probably will need a better way for this*)
   else ((0 < Raylib.get_touch_points_count ()), get_touch_position 0)
 
-let input model =
+let input_playing model =
   let open Moonshot.Model in
   let ccw = is_key_down Key.A in
   let cw = is_key_down Key.S in
   let jump = is_key_down Key.Space in
+  let paused = is_key_pressed Key.P in
   let (touched, tv) = input_mouse_or_touch () in
   let tv' = get_screen_to_world_2d tv model.cam in
   let (tx, ty) = wofsv tv' in
@@ -40,4 +41,19 @@ let input model =
       CCW
     else None in
 
-  {model with player={model.player with input=inp}}
+  let new_t = {model with player={model.player with input=inp}} in
+  if paused then Model.Paused new_t
+  else Model.Playing new_t
+
+let input_paused model =
+  let unpaused = is_key_pressed Key.Space ||
+                 is_key_pressed Key.P ||
+                 is_key_pressed Key.A ||
+                 is_key_pressed Key.S in
+  if unpaused then Model.Playing model
+  else Model.Paused model
+
+let input model =
+  match model with
+  | Model.Paused p -> input_paused p
+  | Model.Playing p -> input_playing p

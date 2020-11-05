@@ -66,7 +66,7 @@ let draw_enemy e =
     | _ -> Color.blue in
   draw_body c e.loc.body
 
-let draw model =
+let draw_playing model =
   let { Moonshot.Model.bullets=movables; static=bodies; fading=fading;
         player={feet=pfeet; head=phead; input=inp}; enemies; cam } = model in
   let player = model.player in
@@ -88,4 +88,16 @@ let draw model =
       draw_dotted_line Color.gray 10.0 ax ay px py;
    | _ -> ());
   end_drawing ();
-  model
+  Model.Playing model
+
+let draw_paused model =
+  begin_drawing ();
+  clear_background Color.raywhite;
+  draw_text "Paused" 10 10 14 Color.gray;
+  end_drawing ();
+  Model.Paused model
+
+let draw model =
+  match model with
+  | Model.Paused p -> draw_paused p
+  | Model.Playing p -> draw_playing p

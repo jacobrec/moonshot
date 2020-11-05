@@ -211,7 +211,7 @@ let update_camera cam player =
   Camera2D.set_zoom cam new_zoom;
   cam
 
-let update delta model =
+let update_playing delta model =
   let open Moonshot.Body in
   let { Moonshot.Model.bullets=movables; static=bodies; fading=fading; player=player; enemies; cam } = model in
   let bodies = List.concat [List.map (fun x -> ignore (x.remaining); x.body) fading; bodies] in
@@ -227,4 +227,13 @@ let update delta model =
   let new_bullets = List.concat [alive; player_bullets] in
   let enemies = update_enemies delta bodies fading enemies in
   let cam = update_camera cam player in
-  { model with bullets=new_bullets; fading; player; enemies; cam}
+  Model.Playing { model with bullets=new_bullets; fading; player; enemies; cam}
+
+let update_paused _delta model =
+  Model.Paused model
+
+let update delta model =
+  match model with
+  | Model.Paused p -> update_paused delta p
+  | Model.Playing p -> update_playing delta p
+

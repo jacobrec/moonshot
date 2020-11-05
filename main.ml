@@ -6,7 +6,7 @@ open Moonshot
 let setup () =
   init_window screen_width screen_height "test1";
   set_target_fps 60;
-  Level.load 1
+  Model.Playing (Level.load 1)
 
 
 let rec loop model =

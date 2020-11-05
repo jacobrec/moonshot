@@ -44,7 +44,7 @@ module Enemy = struct
 end
 
 module Model = struct
-  type t = {
+  type playing = {
       static : Body.t list;
       bullets : Body.moving list;
       fading : Body.fading list;
@@ -52,6 +52,10 @@ module Model = struct
       enemies : Enemy.t list;
       cam : Camera2D.t;
     }
+
+  type t =
+    | Playing of playing
+    | Paused of playing
 end
 
 let ssize = 65
