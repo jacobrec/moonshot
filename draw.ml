@@ -68,6 +68,8 @@ let draw_enemy e =
 
 let draw_planet p =
   let open Body in
+  let pain = p.is_painful in
+  let p = p.body in
   let density = p.mass /. (p.radius *. p.radius) in
   let color =
     if density > 30.0 then Color.black
@@ -77,17 +79,20 @@ let draw_planet p =
     else if density > 10.0 then Color.gold
     else if density > 5.0 then Color.beige
     else Color.lightgray in
-  Printf.printf "Density: %f\n%!" density;
-  draw_body color p
+  let r = p.radius in
+  let (px, py) = sofwv p.pos in
+  let pr = float_of_int @@ sofw r in
+  if pain then draw_circle_gradient px py pr Color.red color
+  else draw_circle px py pr color
 
 let draw_playing model =
-  let { Moonshot.Model.bullets=movables; static=bodies; fading=fading;
+  let { Moonshot.Model.bullets=movables; static; fading;
         player={feet=pfeet; head=phead; input=inp; health}; enemies; cam; runtime; _} = model in
   let player = model.player in
   begin_drawing ();
   begin_mode_2d cam;
   clear_background Color.raywhite;
-  List.iter draw_planet bodies;
+  List.iter draw_planet static;
   List.iter (fun x -> let open Moonshot.Body in draw_body Color.black x.moving.body) movables;
   List.iter draw_explosion fading;
   List.iter (draw_body Color.lime) @@
@@ -95,6 +100,7 @@ let draw_playing model =
   List.iter draw_enemy enemies;
   (match inp with
    | Moonshot.Player.Aiming (ax, ay) ->
+      let bodies = List.map (fun x -> let open Body in ignore (x.is_painful); x.body) static in
       draw_aim_assist bodies 5 0.15 ax ay player;
       let (px, py) = vector phead.body.pos in
       let (ax, ay) = Update.truncate_aim ax ay px py in
@@ -144,6 +150,7 @@ let draw_levelend model =
   clear_background Color.raywhite;
   let msg = match model.reason with
     | Victory -> "Victory!!"
+    | DriftedAway -> "Lost in space :("
     | Died -> "You Died :(" in
   let msg = Printf.sprintf "Level %s\n%s\nYou took %d shots\nIt took you %.2f seconds\nYou took %.1f damage\nYour longest shot stayed in orbit for %.2f seconds\nPress space to continue"
               model.name msg model.shots_taken model.runtime

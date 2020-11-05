@@ -131,14 +131,17 @@ let update_planet_collidable ?(inp=None) delta bodies base =
 
   (b'', (b_fx, b_fy))
 
-let update_player delta bodies fading player =
+let update_player delta bodies static fading player =
   let {Moonshot.Player.head=float; feet=base; input; health} = player in
   (* player is like a balloon attached to a rock at a fixed distance *)
   let open Moonshot.Body in
 
+  let ouchies = List.filter (fun x -> x.is_painful) static in
+  let touching_ouchy_planets = List.exists (fun b2 -> ignore (b2.is_painful); bodies_touch base.body b2.body) ouchies in
   let in_any_explosion = List.exists (fun b2 -> ignore(b2.remaining);
                                                    bodies_touch base.body b2.body) fading in
-  let health = if in_any_explosion then health - 1 else health in
+  let health = if in_any_explosion || touching_ouchy_planets then health - 1 else health in
+  let input = if in_any_explosion || touching_ouchy_planets then Player.Jump else input in
 
   (* Calculate new base *)
   let (new_b, (b_fx, b_fy)) = update_planet_collidable ~inp:(Some input) delta bodies base in
@@ -236,6 +239,8 @@ let update_playing_check_for_level_end model =
 
   let end_conditions = [
       ((fun _ -> model.player.health <= 0), Model.Died);
+      ((fun _ -> let (x, y) = vector model.player.feet.body.pos in
+                 100.0 *. 100.0 < (x *. x +. y *. y)), Model.DriftedAway);
       ((fun _ -> 0 = List.length model.enemies), Model.Victory);
     ] in
   match List.find_opt (fun (a, _) -> a ()) end_conditions with
@@ -249,9 +254,10 @@ let update_playing_check_for_level_end model =
 
 let update_playing delta model =
   let open Moonshot.Body in
-  let { Moonshot.Model.bullets=bullets; static=bodies; fading=fading; player=player;
+  let { Moonshot.Model.bullets=bullets; static; fading; player;
         enemies; cam; runtime; shots_taken; longest_bullet; _ } = model in
-  let bodies = List.concat [List.map (fun x -> ignore (x.remaining); x.body) fading; bodies] in
+  let bodies = List.concat [List.map (fun x -> ignore (x.remaining); x.body) fading;
+                            List.map (fun x -> ignore (x.is_painful); x.body) static] in
   let fading = List.map (fun x -> { x with remaining =  x.remaining -. delta}) fading in
   let fading = List.filter (fun x -> x.remaining > 0.0) fading in
   let movables = List.map (update_bullet delta bodies) bullets in
@@ -262,7 +268,7 @@ let update_playing delta model =
   let longest_bullet = List.fold_left (fun a x -> Float.max a x) longest_bullet bullet_time in
   let create_explosions = List.map (fun (_, a) -> a) create_explosions in
   let fading = List.concat [fading; create_explosions] in
-  let player = update_player delta bodies fading player in
+  let player = update_player delta bodies static fading player in
   let player_bullets = create_player_bullets runtime player in
   let shots_taken = shots_taken + List.length player_bullets in
   let new_bullets = List.concat [alive; player_bullets] in

@@ -10,6 +10,10 @@ module Body = struct
       remaining: float; (* in seconds *)
       body: t;
     }
+  type planet = {
+      body: t;
+      is_painful: bool;
+    }
   type moving = {
       vel: Vector2.t; (* in m/s *)
       body: t;
@@ -55,7 +59,7 @@ end
 module Model = struct
   type playing = {
       name : string;
-      static : Body.t list;
+      static : Body.planet list;
       bullets : Body.bullet list;
       fading : Body.fading list;
       player : Player.t;
@@ -69,6 +73,7 @@ module Model = struct
   type endreason =
     | Victory
     | Died
+    | DriftedAway
 
   type endstats = {
       health  : int;
