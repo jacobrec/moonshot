@@ -131,10 +131,14 @@ let update_planet_collidable ?(inp=None) delta bodies base =
 
   (b'', (b_fx, b_fy))
 
-let update_player delta bodies player =
-  let {Moonshot.Player.head=float; feet=base; input} = player in
+let update_player delta bodies fading player =
+  let {Moonshot.Player.head=float; feet=base; input; health} = player in
   (* player is like a balloon attached to a rock at a fixed distance *)
   let open Moonshot.Body in
+
+  let in_any_explosion = List.exists (fun b2 -> ignore(b2.remaining);
+                                                   bodies_touch base.body b2.body) fading in
+  let health = if in_any_explosion then health - 1 else health in
 
   (* Calculate new base *)
   let (new_b, (b_fx, b_fy)) = update_planet_collidable ~inp:(Some input) delta bodies base in
@@ -146,7 +150,7 @@ let update_player delta bodies player =
   Vector2.set_x new_f.body.pos ((Vector2.x new_b.body.pos) +. seperation *. Float.cos gravity_dir);
   Vector2.set_y new_f.body.pos ((Vector2.y new_b.body.pos) +. seperation *. Float.sin gravity_dir);
 
-  {player with Moonshot.Player.head=new_f; feet=new_b}
+  {player with Moonshot.Player.head=new_f; feet=new_b; health}
 
 let truncate_aim ax ay px py =
   let aim_length = 10.0 in
@@ -211,9 +215,16 @@ let update_camera cam player =
   Camera2D.set_zoom cam new_zoom;
   cam
 
+let update_playing_check_for_level_end model =
+  let open Moonshot.Model in
+  if model.player.health <= 0 then Model.MenuScreen (* Level lost *)
+  else if 0 = List.length model.enemies then Model.MenuScreen (* Level won *)
+  else Model.Playing model
+
 let update_playing delta model =
   let open Moonshot.Body in
-  let { Moonshot.Model.bullets=movables; static=bodies; fading=fading; player=player; enemies; cam } = model in
+  let { Moonshot.Model.bullets=movables; static=bodies; fading=fading; player=player;
+        enemies; cam; runtime } = model in
   let bodies = List.concat [List.map (fun x -> ignore (x.remaining); x.body) fading; bodies] in
   let fading = List.map (fun x -> { x with remaining =  x.remaining -. delta}) fading in
   let fading = List.filter (fun x -> x.remaining > 0.0) fading in
@@ -222,12 +233,15 @@ let update_playing delta model =
   let (dead, alive) = List.partition in_any_static movables in
   let create_explosions = List.map explosion_from_body dead in
   let fading = List.concat [fading; create_explosions] in
-  let player = update_player delta bodies player in
+  let player = update_player delta bodies fading player in
   let player_bullets = create_player_bullets player in
   let new_bullets = List.concat [alive; player_bullets] in
   let enemies = update_enemies delta bodies fading enemies in
+  let living_enemies = List.filter (fun x -> Moonshot.Enemy.is_alive x) enemies in
   let cam = update_camera cam player in
-  Model.Playing { model with bullets=new_bullets; fading; player; enemies; cam}
+  let runtime = if 0 = List.length living_enemies then runtime else runtime +. delta in
+  update_playing_check_for_level_end
+    { model with bullets=new_bullets; fading; player; enemies; cam; runtime}
 
 let update delta model =
   match model with

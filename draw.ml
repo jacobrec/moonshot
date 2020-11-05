@@ -68,8 +68,9 @@ let draw_enemy e =
 
 let draw_playing model =
   let { Moonshot.Model.bullets=movables; static=bodies; fading=fading;
-        player={feet=pfeet; head=phead; input=inp}; enemies; cam } = model in
+        player={feet=pfeet; head=phead; input=inp; health}; enemies; cam; runtime} = model in
   let player = model.player in
+  begin_drawing ();
   begin_mode_2d cam;
   clear_background Color.raywhite;
   List.iter (draw_body Color.beige) bodies;
@@ -87,6 +88,24 @@ let draw_playing model =
       let (px, py) = sofwv phead.body.pos in
       draw_dotted_line Color.gray 10.0 ax ay px py;
    | _ -> ());
+  end_mode_2d ();
+
+  (* Draw HUD *)
+  let heart_space = 30 in
+  let heart_radius = 10.0 in
+  let heart_offset = 15 in
+  let draw_hearts i =
+    let xs = List.init i (fun i -> heart_offset + heart_space * i) in
+    List.iter (fun x -> draw_circle x heart_offset heart_radius Color.red) xs in
+  let draw_half_heart x =
+    draw_circle x heart_offset (heart_radius/.2.0) Color.red in
+  draw_hearts (health / 2);
+  if health mod 2 == 1 then
+    draw_half_heart (heart_offset + heart_space * (health / 2));
+
+  let trunc_time = (float_of_int (int_of_float (runtime *. 100.0))) /. 100.0 in
+  draw_text (string_of_float trunc_time) (Moonshot.screen_width - 50) 10 14 Color.gold;
+
   end_drawing ();
   Model.Playing model
 

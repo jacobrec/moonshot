@@ -29,6 +29,7 @@ module Player = struct
       head : Body.moving;
       feet : Body.moving;
       input: input_type;
+      health : int;
     }
 end
 
@@ -41,6 +42,10 @@ module Enemy = struct
       loc : Body.moving;
       action : action;
     }
+  let is_alive x =
+    match x.action with
+    | Dead _ -> false
+    | _ -> true
 end
 
 module Model = struct
@@ -51,6 +56,7 @@ module Model = struct
       player : Player.t;
       enemies : Enemy.t list;
       cam : Camera2D.t;
+      runtime : float;
     }
 
   type t =

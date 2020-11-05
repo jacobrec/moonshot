@@ -12,13 +12,15 @@ let make_level px py bodies enemies =
         Moonshot.Body.body={pos=vc x y; mass=  10.0; radius=0.5;}; vel=vc 1.0 0.0};
       Moonshot.Player.head={
           Moonshot.Body.body={pos=vc x (y +. 1.0); mass= -3.5; radius=0.5;}; vel=vc (-1.0) 0.0};
-      input=Moonshot.Player.None
+      input=Moonshot.Player.None;
+      Moonshot.Player.health=6;
     } in
   { Moonshot.Model.static=bodies;
     fading=[];
     enemies;
     cam;
     player=make_player px py;
+    runtime=0.0;
     bullets=movables }
 
 
