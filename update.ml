@@ -217,8 +217,14 @@ let update_camera cam player =
 
 let update_playing_check_for_level_end model =
   let open Moonshot.Model in
-  if model.player.health <= 0 then Model.MenuScreen (* Level lost *)
-  else if 0 = List.length model.enemies then Model.MenuScreen (* Level won *)
+  if model.player.health <= 0 then Model.LevelEnd {Model.reason=Model.Died;
+                                                   runtime=model.runtime;
+                                                   level=0;
+                                                   health=model.player.health} 
+  else if 0 = List.length model.enemies then Model.LevelEnd {Model.reason=Model.Victory;
+                                                   runtime=model.runtime;
+                                                   level=0;
+                                                   health=model.player.health}
   else Model.Playing model
 
 let update_playing delta model =
@@ -248,4 +254,5 @@ let update delta model =
   | Model.Paused p -> Model.Paused p
   | Model.Playing p -> update_playing delta p
   | Model.MenuScreen -> Model.MenuScreen
+  | Model.LevelEnd p -> Model.LevelEnd p
 

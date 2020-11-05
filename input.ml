@@ -67,9 +67,13 @@ let input_menu _ =
   else if is_key_pressed Key.Nine  then Model.Playing (Level.load 9)
   else Model.MenuScreen
 
+let input_levelend p =
+  if is_key_pressed Key.Space then Model.MenuScreen
+  else Model.LevelEnd p
 
 let input model =
   match model with
   | Model.Paused p -> input_paused p
   | Model.Playing p -> input_playing p
   | Model.MenuScreen -> input_menu ()
+  | Model.LevelEnd p -> input_levelend p

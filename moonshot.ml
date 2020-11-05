@@ -59,9 +59,21 @@ module Model = struct
       runtime : float;
     }
 
+  type endreason =
+    | Victory
+    | Died
+
+  type endstats = {
+      health  : int;
+      runtime : float;
+      level   : int;
+      reason  : endreason;
+    }
+
   type t =
     | Playing of playing
     | Paused of playing
+    | LevelEnd of endstats
     | MenuScreen
 end
 

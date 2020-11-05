@@ -124,8 +124,21 @@ let draw_menuscreen _ =
   end_drawing ();
   Model.MenuScreen
 
+let draw_levelend model =
+  let open Moonshot.Model in
+  begin_drawing ();
+  clear_background Color.raywhite;
+  let msg = match model.reason with
+    | Victory -> "Victory!!"
+    | Died -> "You Died :(" in
+  draw_text msg 10 10 14 Color.gray;
+  draw_text "Press space to continue" 10 20 14 Color.gray;
+  end_drawing ();
+  Model.LevelEnd model
+
 let draw model =
   match model with
   | Model.Paused p -> draw_paused p
   | Model.Playing p -> draw_playing p
   | Model.MenuScreen -> draw_menuscreen ()
+  | Model.LevelEnd p -> draw_levelend p
