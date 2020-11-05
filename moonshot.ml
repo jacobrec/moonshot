@@ -14,6 +14,10 @@ module Body = struct
       vel: Vector2.t; (* in m/s *)
       body: t;
     }
+  type bullet = {
+      created_at : float;
+      moving : moving;
+    }
 end
 
 module Player = struct
@@ -51,13 +55,14 @@ end
 module Model = struct
   type playing = {
       static : Body.t list;
-      bullets : Body.moving list;
+      bullets : Body.bullet list;
       fading : Body.fading list;
       player : Player.t;
       enemies : Enemy.t list;
       cam : Camera2D.t;
       runtime : float;
       shots_taken : int;
+      longest_bullet : float;
     }
 
   type endreason =
@@ -69,6 +74,7 @@ module Model = struct
       runtime : float;
       level   : int;
       shots_taken : int;
+      longest_bullet : float;
       reason  : endreason;
     }
 
@@ -115,8 +121,5 @@ let sofwv = screen_of_world_vector
 let wofsv = world_of_screen_vector
 
 let explosion_time = 1.0
-let explosion_from_body x =
-  let open Body in
-  {remaining=explosion_time; body={x.body with radius=3.0; mass= -100.0}}
 
 

@@ -176,12 +176,24 @@ let create_bullet_from_aim ax ay head =
    vel=vel}
 
 
-let create_player_bullets player =
+let create_player_bullets time player =
   let open Moonshot.Player in
   match player.input with
   | Moonshot.Player.Fire (ax, ay) ->
-     [create_bullet_from_aim ax ay player.head]
+     [{Body.created_at=time; moving=create_bullet_from_aim ax ay player.head}]
   | _ -> []
+
+let explosion_from_body time x =
+  let open Body in
+  let t = time -. x.created_at in
+  let x = x.moving in
+  (t, {remaining=Moonshot.explosion_time; body={x.body with radius=3.0; mass= -100.0}})
+
+let update_bullet delta bodies bullet =
+  let open Body in
+  let movable = bullet.moving in
+  let moving = update_body delta bodies movable in
+  { bullet with moving }
 
 let update_enemies delta bodies fading enemies =
   let open Moonshot.Enemy in
@@ -217,40 +229,50 @@ let update_camera cam player =
 
 let update_playing_check_for_level_end model =
   let open Moonshot.Model in
+  let bullets = model.bullets in
+  let longest_bullet = List.fold_left
+                         (fun a x -> let open Body in Float.max a (model.runtime -. x.created_at))
+                         model.longest_bullet bullets in
+
   if model.player.health <= 0 then Model.LevelEnd {Model.reason=Model.Died;
                                                    runtime=model.runtime;
                                                    level=0;
+                                                   longest_bullet;
                                                    shots_taken=model.shots_taken;
                                                    health=model.player.health}
   else if 0 = List.length model.enemies then Model.LevelEnd {Model.reason=Model.Victory;
                                                    runtime=model.runtime;
                                                    level=0;
+                                                   longest_bullet;
                                                    shots_taken=model.shots_taken;
                                                    health=model.player.health}
   else Model.Playing model
 
 let update_playing delta model =
   let open Moonshot.Body in
-  let { Moonshot.Model.bullets=movables; static=bodies; fading=fading; player=player;
-        enemies; cam; runtime; shots_taken } = model in
+  let { Moonshot.Model.bullets=bullets; static=bodies; fading=fading; player=player;
+        enemies; cam; runtime; shots_taken; longest_bullet } = model in
   let bodies = List.concat [List.map (fun x -> ignore (x.remaining); x.body) fading; bodies] in
   let fading = List.map (fun x -> { x with remaining =  x.remaining -. delta}) fading in
   let fading = List.filter (fun x -> x.remaining > 0.0) fading in
-  let movables = List.map (update_body delta bodies) movables in
-  let in_any_static b1 = List.exists (fun b2 -> bodies_touch b1.body b2) bodies in
+  let movables = List.map (update_bullet delta bodies) bullets in
+  let in_any_static b1 = List.exists (fun b2 -> bodies_touch b1.moving.body b2) bodies in
   let (dead, alive) = List.partition in_any_static movables in
-  let create_explosions = List.map explosion_from_body dead in
+  let create_explosions = List.map (explosion_from_body runtime) dead in
+  let bullet_time = List.map (fun (a, _) -> a) create_explosions in
+  let longest_bullet = List.fold_left (fun a x -> Float.max a x) longest_bullet bullet_time in
+  let create_explosions = List.map (fun (_, a) -> a) create_explosions in
   let fading = List.concat [fading; create_explosions] in
   let player = update_player delta bodies fading player in
-  let player_bullets = create_player_bullets player in
-  let new_bullets = List.concat [alive; player_bullets] in
+  let player_bullets = create_player_bullets runtime player in
   let shots_taken = shots_taken + List.length player_bullets in
+  let new_bullets = List.concat [alive; player_bullets] in
   let enemies = update_enemies delta bodies fading enemies in
   let living_enemies = List.filter (fun x -> Moonshot.Enemy.is_alive x) enemies in
   let cam = update_camera cam player in
   let runtime = if 0 = List.length living_enemies then runtime else runtime +. delta in
   update_playing_check_for_level_end
-    { model with bullets=new_bullets; fading; player; enemies; cam; runtime; shots_taken}
+    { model with bullets=new_bullets; fading; player; enemies; cam; runtime; shots_taken; longest_bullet }
 
 let update delta model =
   match model with

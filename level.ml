@@ -22,6 +22,7 @@ let make_level px py bodies enemies =
     player=make_player px py;
     runtime=0.0;
     shots_taken=0;
+    longest_bullet=0.0;
     bullets=movables }
 
 
@@ -39,9 +40,9 @@ let level_zero _ =
 
 let level_one _ =
   let bodies = [
-      {Moonshot.Body.pos=vc (-10.0) ( 0.0); mass=500.0; radius=7.0;};
-      {Moonshot.Body.pos=vc ( 10.0) ( 10.0); mass=500.0; radius=7.0;};
-      {Moonshot.Body.pos=vc ( 10.0) (-10.0); mass=500.0; radius=7.0;};
+      {Moonshot.Body.pos=vc (-15.0) ( 0.0); mass=500.0; radius=7.0;};
+      {Moonshot.Body.pos=vc ( 15.0) ( 15.0); mass=500.0; radius=7.0;};
+      {Moonshot.Body.pos=vc ( 15.0) (-15.0); mass=500.0; radius=7.0;};
     ] in
   let enemies = [
       {Moonshot.Enemy.loc={Moonshot.Body.body={
