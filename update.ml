@@ -220,17 +220,19 @@ let update_playing_check_for_level_end model =
   if model.player.health <= 0 then Model.LevelEnd {Model.reason=Model.Died;
                                                    runtime=model.runtime;
                                                    level=0;
-                                                   health=model.player.health} 
+                                                   shots_taken=model.shots_taken;
+                                                   health=model.player.health}
   else if 0 = List.length model.enemies then Model.LevelEnd {Model.reason=Model.Victory;
                                                    runtime=model.runtime;
                                                    level=0;
+                                                   shots_taken=model.shots_taken;
                                                    health=model.player.health}
   else Model.Playing model
 
 let update_playing delta model =
   let open Moonshot.Body in
   let { Moonshot.Model.bullets=movables; static=bodies; fading=fading; player=player;
-        enemies; cam; runtime } = model in
+        enemies; cam; runtime; shots_taken } = model in
   let bodies = List.concat [List.map (fun x -> ignore (x.remaining); x.body) fading; bodies] in
   let fading = List.map (fun x -> { x with remaining =  x.remaining -. delta}) fading in
   let fading = List.filter (fun x -> x.remaining > 0.0) fading in
@@ -242,12 +244,13 @@ let update_playing delta model =
   let player = update_player delta bodies fading player in
   let player_bullets = create_player_bullets player in
   let new_bullets = List.concat [alive; player_bullets] in
+  let shots_taken = shots_taken + List.length player_bullets in
   let enemies = update_enemies delta bodies fading enemies in
   let living_enemies = List.filter (fun x -> Moonshot.Enemy.is_alive x) enemies in
   let cam = update_camera cam player in
   let runtime = if 0 = List.length living_enemies then runtime else runtime +. delta in
   update_playing_check_for_level_end
-    { model with bullets=new_bullets; fading; player; enemies; cam; runtime}
+    { model with bullets=new_bullets; fading; player; enemies; cam; runtime; shots_taken}
 
 let update delta model =
   match model with

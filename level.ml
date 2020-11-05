@@ -21,6 +21,7 @@ let make_level px py bodies enemies =
     cam;
     player=make_player px py;
     runtime=0.0;
+    shots_taken=0;
     bullets=movables }
 
 

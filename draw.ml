@@ -68,7 +68,7 @@ let draw_enemy e =
 
 let draw_playing model =
   let { Moonshot.Model.bullets=movables; static=bodies; fading=fading;
-        player={feet=pfeet; head=phead; input=inp; health}; enemies; cam; runtime} = model in
+        player={feet=pfeet; head=phead; input=inp; health}; enemies; cam; runtime; _} = model in
   let player = model.player in
   begin_drawing ();
   begin_mode_2d cam;
@@ -131,8 +131,9 @@ let draw_levelend model =
   let msg = match model.reason with
     | Victory -> "Victory!!"
     | Died -> "You Died :(" in
+  let msg = Printf.sprintf "Level %d\n%s\nYou took %d shots\nIt took you %.2f seconds\nYou took %.1f damage\nPress space to continue"
+              100 msg model.shots_taken model.runtime (float_of_int (6-model.health) /. 2.0) in
   draw_text msg 10 10 14 Color.gray;
-  draw_text "Press space to continue" 10 20 14 Color.gray;
   end_drawing ();
   Model.LevelEnd model
 

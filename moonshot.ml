@@ -57,6 +57,7 @@ module Model = struct
       enemies : Enemy.t list;
       cam : Camera2D.t;
       runtime : float;
+      shots_taken : int;
     }
 
   type endreason =
@@ -67,6 +68,7 @@ module Model = struct
       health  : int;
       runtime : float;
       level   : int;
+      shots_taken : int;
       reason  : endreason;
     }
 
