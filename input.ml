@@ -53,7 +53,23 @@ let input_paused model =
   if unpaused then Model.Playing model
   else Model.Paused model
 
+let input_menu _ =
+  (* TODO: Graphical selector with buttons *)
+       if is_key_pressed Key.Zero  then Model.Playing (Level.load 0)
+  else if is_key_pressed Key.One   then Model.Playing (Level.load 1)
+  else if is_key_pressed Key.Two   then Model.Playing (Level.load 2)
+  else if is_key_pressed Key.Three then Model.Playing (Level.load 3)
+  else if is_key_pressed Key.Four  then Model.Playing (Level.load 4)
+  else if is_key_pressed Key.Five  then Model.Playing (Level.load 5)
+  else if is_key_pressed Key.Six   then Model.Playing (Level.load 6)
+  else if is_key_pressed Key.Seven then Model.Playing (Level.load 7)
+  else if is_key_pressed Key.Eight then Model.Playing (Level.load 8)
+  else if is_key_pressed Key.Nine  then Model.Playing (Level.load 9)
+  else Model.MenuScreen
+
+
 let input model =
   match model with
   | Model.Paused p -> input_paused p
   | Model.Playing p -> input_playing p
+  | Model.MenuScreen -> input_menu ()

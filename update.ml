@@ -229,11 +229,9 @@ let update_playing delta model =
   let cam = update_camera cam player in
   Model.Playing { model with bullets=new_bullets; fading; player; enemies; cam}
 
-let update_paused _delta model =
-  Model.Paused model
-
 let update delta model =
   match model with
-  | Model.Paused p -> update_paused delta p
+  | Model.Paused p -> Model.Paused p
   | Model.Playing p -> update_playing delta p
+  | Model.MenuScreen -> Model.MenuScreen
 

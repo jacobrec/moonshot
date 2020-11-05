@@ -56,6 +56,7 @@ module Model = struct
   type t =
     | Playing of playing
     | Paused of playing
+    | MenuScreen
 end
 
 let ssize = 65

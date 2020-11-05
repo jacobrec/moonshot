@@ -97,7 +97,16 @@ let draw_paused model =
   end_drawing ();
   Model.Paused model
 
+let draw_menuscreen _ =
+  begin_drawing ();
+  clear_background Color.raywhite;
+  draw_text "Main Menu" 10 10 14 Color.gray;
+  draw_text "Press 0-9 to select a level" 10 20 14 Color.gray;
+  end_drawing ();
+  Model.MenuScreen
+
 let draw model =
   match model with
   | Model.Paused p -> draw_paused p
   | Model.Playing p -> draw_playing p
+  | Model.MenuScreen -> draw_menuscreen ()
