@@ -2,7 +2,7 @@ open Moonshot
 
 let vc = Raylib.Vector2.create
 
-let make_level px py bodies enemies =
+let make_level name px py bodies enemies =
   let movables = [] in
   let cam = Raylib.Camera2D.create (vc (float_of_int (screen_width / 2)) (float_of_int (screen_height / 2)))
               (vc 0.0 0.0) 0.0 1.0 in (* offset target rotation zoom *)
@@ -16,6 +16,7 @@ let make_level px py bodies enemies =
       Moonshot.Player.health=6;
     } in
   { Moonshot.Model.static=bodies;
+    name;
     fading=[];
     enemies;
     cam;
@@ -36,7 +37,7 @@ let level_zero _ =
                              Moonshot.Body.pos=vc 30.0 (-6.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level (-30.0) 0.0 bodies enemies
+  make_level "Zero" (-30.0) 0.0 bodies enemies
 
 let level_one _ =
   let bodies = [
@@ -49,7 +50,7 @@ let level_one _ =
                              Moonshot.Body.pos=vc 30.0 (-6.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level (-30.0) 0.0 bodies enemies
+  make_level "One" (-30.0) 0.0 bodies enemies
 
 
 let load i =

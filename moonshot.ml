@@ -54,6 +54,7 @@ end
 
 module Model = struct
   type playing = {
+      name : string;
       static : Body.t list;
       bullets : Body.bullet list;
       fading : Body.fading list;
@@ -72,10 +73,10 @@ module Model = struct
   type endstats = {
       health  : int;
       runtime : float;
-      level   : int;
       shots_taken : int;
       longest_bullet : float;
       reason  : endreason;
+      name : string;
     }
 
   type t =

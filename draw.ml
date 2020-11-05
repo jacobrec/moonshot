@@ -66,6 +66,20 @@ let draw_enemy e =
     | _ -> Color.blue in
   draw_body c e.loc.body
 
+let draw_planet p =
+  let open Body in
+  let density = p.mass /. (p.radius *. p.radius) in
+  let color =
+    if density > 30.0 then Color.black
+    else if density > 25.0 then Color.black
+    else if density > 20.0 then Color.brown
+    else if density > 15.0 then Color.gray
+    else if density > 10.0 then Color.gold
+    else if density > 5.0 then Color.beige
+    else Color.lightgray in
+  Printf.printf "Density: %f\n%!" density;
+  draw_body color p
+
 let draw_playing model =
   let { Moonshot.Model.bullets=movables; static=bodies; fading=fading;
         player={feet=pfeet; head=phead; input=inp; health}; enemies; cam; runtime; _} = model in
@@ -73,7 +87,7 @@ let draw_playing model =
   begin_drawing ();
   begin_mode_2d cam;
   clear_background Color.raywhite;
-  List.iter (draw_body Color.beige) bodies;
+  List.iter draw_planet bodies;
   List.iter (fun x -> let open Moonshot.Body in draw_body Color.black x.moving.body) movables;
   List.iter draw_explosion fading;
   List.iter (draw_body Color.lime) @@
@@ -131,8 +145,8 @@ let draw_levelend model =
   let msg = match model.reason with
     | Victory -> "Victory!!"
     | Died -> "You Died :(" in
-  let msg = Printf.sprintf "Level %d\n%s\nYou took %d shots\nIt took you %.2f seconds\nYou took %.1f damage\nYour longest shot stayed in orbit for %.2f seconds\nPress space to continue"
-              100 msg model.shots_taken model.runtime
+  let msg = Printf.sprintf "Level %s\n%s\nYou took %d shots\nIt took you %.2f seconds\nYou took %.1f damage\nYour longest shot stayed in orbit for %.2f seconds\nPress space to continue"
+              model.name msg model.shots_taken model.runtime
               (float_of_int (6-model.health) /. 2.0) model.longest_bullet in
   draw_text msg 10 10 14 Color.gray;
   end_drawing ();

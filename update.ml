@@ -234,24 +234,23 @@ let update_playing_check_for_level_end model =
                          (fun a x -> let open Body in Float.max a (model.runtime -. x.created_at))
                          model.longest_bullet bullets in
 
-  if model.player.health <= 0 then Model.LevelEnd {Model.reason=Model.Died;
-                                                   runtime=model.runtime;
-                                                   level=0;
-                                                   longest_bullet;
-                                                   shots_taken=model.shots_taken;
-                                                   health=model.player.health}
-  else if 0 = List.length model.enemies then Model.LevelEnd {Model.reason=Model.Victory;
-                                                   runtime=model.runtime;
-                                                   level=0;
-                                                   longest_bullet;
-                                                   shots_taken=model.shots_taken;
-                                                   health=model.player.health}
-  else Model.Playing model
+  let end_conditions = [
+      ((fun _ -> model.player.health <= 0), Model.Died);
+      ((fun _ -> 0 = List.length model.enemies), Model.Victory);
+    ] in
+  match List.find_opt (fun (a, _) -> a ()) end_conditions with
+  | Some (_, reason) ->Model.LevelEnd {Model.reason=reason;
+                        name=model.name;
+                        runtime=model.runtime;
+                        longest_bullet;
+                        shots_taken=model.shots_taken;
+                        health=model.player.health}
+  | None -> Model.Playing model
 
 let update_playing delta model =
   let open Moonshot.Body in
   let { Moonshot.Model.bullets=bullets; static=bodies; fading=fading; player=player;
-        enemies; cam; runtime; shots_taken; longest_bullet } = model in
+        enemies; cam; runtime; shots_taken; longest_bullet; _ } = model in
   let bodies = List.concat [List.map (fun x -> ignore (x.remaining); x.body) fading; bodies] in
   let fading = List.map (fun x -> { x with remaining =  x.remaining -. delta}) fading in
   let fading = List.filter (fun x -> x.remaining > 0.0) fading in
