@@ -257,23 +257,32 @@ let update_playing delta model =
   let open Moonshot.Body in
   let { Moonshot.Model.bullets=bullets; static; fading; player;
         enemies; cam; runtime; shots_taken; longest_bullet; _ } = model in
-  let bodies = List.concat [List.map (fun x -> ignore (x.remaining); x.body) fading;
-                            List.map (fun x -> ignore (x.is_painful); x.body) static] in
+  let enemy_body x = let open Enemy in x.loc.body in
+  let explosion_body x = ignore (x.remaining); x.body in
+  let planet_body x = ignore (x.is_painful); x.body in
+  let bullet_body x = ignore (x.created_at); x.moving.body in
+  let body_set ?(bullets=[]) ?(static=[]) ?(fading=[]) ?(enemies=[]) _ =
+    List.concat [List.map explosion_body fading;
+                 List.map enemy_body enemies;
+                 List.map bullet_body bullets;
+                 List.map planet_body static]
+    in
   let fading = List.map (fun x -> { x with remaining =  x.remaining -. delta}) fading in
   let fading = List.filter (fun x -> x.remaining > 0.0) fading in
-  let movables = List.map (update_bullet delta bodies) bullets in
-  let in_any_static b1 = List.exists (fun b2 -> bodies_touch b1.moving.body b2) (List.concat [bodies; List.map (fun x -> let open Enemy in x.loc.body) enemies]) in
+  let movables = List.map (update_bullet delta (body_set ~fading ~static ())) bullets in
+  let in_any_static b1 = List.exists (fun b2 -> bodies_touch b1.moving.body b2)
+                           (body_set ~fading ~static ~enemies ()) in
   let (dead, alive) = List.partition in_any_static movables in
   let create_explosions = List.map (explosion_from_body runtime) dead in
   let bullet_time = List.map (fun (a, _) -> a) create_explosions in
   let longest_bullet = List.fold_left (fun a x -> Float.max a x) longest_bullet bullet_time in
   let create_explosions = List.map (fun (_, a) -> a) create_explosions in
   let fading = List.concat [fading; create_explosions] in
-  let player = update_player delta bodies static fading player in
+  let player = update_player delta (body_set ~fading ~static ()) static fading player in
   let player_bullets = create_player_bullets runtime player in
   let shots_taken = shots_taken + List.length player_bullets in
   let new_bullets = List.concat [alive; player_bullets] in
-  let enemies = update_enemies delta bodies fading enemies in
+  let enemies = update_enemies delta (body_set ~fading ~static ()) fading enemies in
   let living_enemies = List.filter (fun x -> Moonshot.Enemy.is_alive x) enemies in
   let cam = update_camera cam player in
   let runtime = if 0 = List.length living_enemies then runtime else runtime +. delta in
