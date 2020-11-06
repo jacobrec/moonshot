@@ -28,11 +28,37 @@ let make_level name px py bodies enemies star_reqs =
     bullets=movables }
 
 
+(* Level design plan *)
+(* There will be multiple worlds
+ * Each world will have 10 + 2 levels.
+ *   10 Regular, needed to be completed before next world and 2 weird ones for fun.
+ * Every level should be able to be completed in under a minute
+ * Completing a level should be easy, 3 stars should be hard
+ * The first few levels from each world should introduce concepts
+ * Then middle few should be relativly easy to get 3 stars
+ * The last few should be hard to get 3 stars
+ * Each world should introduce one or more new concepts
+ *
+ * World 1: Intro
+ * Introduce shooting, moving, jumping, double jumping, planet gravity, and painful planets
+ * 1-1) Shooting
+ * 1-2) Moving
+ * 1-3) Jumping
+ * 1-4) Planet gravities
+ * 1-5) Double Jumping
+ * 1-6) Painful Planets
+ * 1-7) Friendly Fire
+ * 1-8) Stuck on black holes
+ * 1-9) Challenge 1
+ * 1-10) Challenge 2
+ * 1-C1) Hurty planet special
+ * 1-C2) Zero G shooting Challenge
+*)
 let level_zero _ =
   let bodies = [
       {Body.is_painful=true;
        body={Body.pos=vc 0.0 0.0; mass=900.0; radius=10.0;}};
-      {Body.is_painful=true;
+      {Body.is_painful=false;
        body={Body.pos=vc 30.0 0.0; mass=300.0; radius=5.0;}};
     ] in
   let enemies = [
