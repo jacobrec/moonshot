@@ -71,12 +71,36 @@ let level_two _ =
     ] in
   make_level "Two" (-30.0) 0.0 bodies enemies {health=6; time=5.0; shots=1}
 
+let level_three _ =
+  let bodies = [
+      {Body.is_painful=false; body={Body.pos=vc 0.0 0.0; mass=900.0; radius=10.0;}};
+      {Body.is_painful=false; body={Body.pos=vc 40.0 0.0; mass=1200.0; radius=10.0;}};
+      {Body.is_painful=false; body={Body.pos=vc 70.0 (-10.0); mass=600.0; radius=7.0;}};
+      {Body.is_painful=false; body={Body.pos=vc 70.0 10.0; mass=600.0; radius=7.0;}};
+      {Body.is_painful=false; body={Body.pos=vc 60.0 0.0; mass=100.0; radius=3.0;}};
+      {Body.is_painful=true;  body={Body.pos=vc 90.0 (-20.0); mass=500.0; radius=6.0;}};
+      {Body.is_painful=true;  body={Body.pos=vc 30.0 30.0; mass=500.0; radius=1.0;}};
+      {Body.is_painful=false;  body={Body.pos=vc 110.0 30.0; mass=500.0; radius=1.0;}};
+    ] in
+  let enemies = [
+      {Enemy.loc={Body.body={Body.pos=vc 40.0 11.0; mass=1.0; radius=1.0;};
+                  vel=vc 0.0 0.0}; action=Standing};
+      {Enemy.loc={Body.body={Body.pos=vc 70.0 (-18.0); mass=1.0; radius=1.0;};
+                  vel=vc 0.0 0.0}; action=Standing};
+      {Enemy.loc={Body.body={Body.pos=vc 110.0 32.0; mass=1.0; radius=1.0;};
+                  vel=vc 0.0 0.0}; action=Standing};
+      {Enemy.loc={Body.body={Body.pos=vc 110.0 28.0; mass=1.0; radius=1.0;};
+                  vel=vc 0.0 0.0}; action=Standing};
+    ] in
+  make_level "Three" (-10.0) 0.0 bodies enemies {health=6; time=60.0; shots=3}
+
 
 let load i =
   let levels = [
       level_zero;
       level_one;
       level_two;
+      level_three;
     ] in
   match List.nth_opt levels i with
   | Some l -> l ()

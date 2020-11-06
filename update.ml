@@ -92,7 +92,7 @@ let update_planet_collidable ?(inp=None) delta bodies base =
                let vpar = 0.0 in
 
                (* TODO: player controls *)
-               let input_force = 2.0 in
+               let input_force = 20.0 in
                let jump_force = 18.0 in
                let (vpar, vper) = match inp with
                  | None -> (vpar, vper)
@@ -105,9 +105,9 @@ let update_planet_collidable ?(inp=None) delta bodies base =
                in
 
                (* Friction *)
-               let friction = 0.90 in
+               let friction = 0.50 in
                let vper = friction *. vper in
-               let vper = if (Float.abs vper) < 1.5 then 0.0 else vper in
+               let vper = if (Float.abs vper) < 2.0 then 0.0 else vper in
 
                let (new_vx, new_vy) = rotate_back (vpar, vper) in
 
