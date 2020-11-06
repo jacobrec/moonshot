@@ -81,7 +81,6 @@ let update_planet_collidable ?(inp=None) delta bodies base =
   let b' = (match List.find_opt (fun b2 -> bodies_touch b.body b2) bodies with
             | None -> b
             | Some planet ->
-               let e = 0.5 in
                let (vx, vy) = vector b.vel in
 
                let normal_dir = angle_from_vectors b.body.pos planet.pos in
@@ -89,7 +88,8 @@ let update_planet_collidable ?(inp=None) delta bodies base =
                let rotate_back = rotate @@ -. normal_dir in
 
                let (vpar, vper) = rotate_forward (vx, vy) in
-               let vpar = -.e *. vpar in
+               let vpar_jump = -0.5 *. vpar in
+               let vpar = 0.0 in
 
                (* TODO: player controls *)
                let input_force = 2.0 in
@@ -100,7 +100,7 @@ let update_planet_collidable ?(inp=None) delta bodies base =
                     match inp with
                     | Moonshot.Player.CW -> (vpar, vper +. input_force)
                     | Moonshot.Player.CCW -> (vpar, vper -. input_force)
-                    | Moonshot.Player.Jump -> (vpar -. jump_force, vper)
+                    | Moonshot.Player.Jump -> (vpar_jump -. jump_force, vper)
                     | _ -> (vpar, vper)
                in
 
@@ -249,6 +249,7 @@ let update_playing_check_for_level_end model =
                         runtime=model.runtime;
                         longest_bullet;
                         shots_taken=model.shots_taken;
+                        star_reqs=model.star_reqs;
                         health=model.player.health}
   | None -> Model.Playing model
 

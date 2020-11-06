@@ -82,7 +82,7 @@ let draw_planet p =
   let r = p.radius in
   let (px, py) = sofwv p.pos in
   let pr = float_of_int @@ sofw r in
-  if pain then draw_circle_gradient px py pr Color.red color
+  if pain then draw_circle_gradient px py pr color Color.red
   else draw_circle px py pr color
 
 let draw_playing model =
@@ -152,9 +152,17 @@ let draw_levelend model =
     | Victory -> "Victory!!"
     | DriftedAway -> "Lost in space :("
     | Died -> "You Died :(" in
-  let msg = Printf.sprintf "Level %s\n%s\nYou took %d shots\nIt took you %.2f seconds\nYou took %.1f damage\nYour longest shot stayed in orbit for %.2f seconds\nPress space to continue"
+  let has_time_star = model.star_reqs.time > model.runtime in
+  let has_shot_star = model.star_reqs.shots > model.shots_taken in
+  let has_health_star = model.star_reqs.health <= model.health in
+  let make_star h b = h ^ ": " ^ (if b then "*" else "-") in
+  let time_star = make_star "Time" has_time_star in
+  let shot_star = make_star "Shots" has_shot_star in
+  let health_star = make_star "Health" has_health_star in
+  let msg = Printf.sprintf "Level %s\n%s\nYou took %d shots\nIt took you %.2f seconds\nYou took %.1f damage\nYour longest shot stayed in orbit for %.2f seconds\n***Stars***\n%s\n%s\n%s\n\nPress space to continue"
               model.name msg model.shots_taken model.runtime
-              (float_of_int (6-model.health) /. 2.0) model.longest_bullet in
+              (float_of_int (6-model.health) /. 2.0) model.longest_bullet
+              health_star time_star shot_star in
   draw_text msg 10 10 14 Color.gray;
   end_drawing ();
   Model.LevelEnd model

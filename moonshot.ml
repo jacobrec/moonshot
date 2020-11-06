@@ -57,6 +57,12 @@ module Enemy = struct
 end
 
 module Model = struct
+  type star_requirements = {
+      time : float;
+      shots : int;
+      health : int;
+    }
+
   type playing = {
       name : string;
       static : Body.planet list;
@@ -68,6 +74,7 @@ module Model = struct
       runtime : float;
       shots_taken : int;
       longest_bullet : float;
+      star_reqs : star_requirements;
     }
 
   type endreason =
@@ -82,6 +89,7 @@ module Model = struct
       longest_bullet : float;
       reason  : endreason;
       name : string;
+      star_reqs : star_requirements;
     }
 
   type t =
