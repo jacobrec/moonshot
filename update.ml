@@ -262,7 +262,7 @@ let update_playing delta model =
   let fading = List.map (fun x -> { x with remaining =  x.remaining -. delta}) fading in
   let fading = List.filter (fun x -> x.remaining > 0.0) fading in
   let movables = List.map (update_bullet delta bodies) bullets in
-  let in_any_static b1 = List.exists (fun b2 -> bodies_touch b1.moving.body b2) bodies in
+  let in_any_static b1 = List.exists (fun b2 -> bodies_touch b1.moving.body b2) (List.concat [bodies; List.map (fun x -> let open Enemy in x.loc.body) enemies]) in
   let (dead, alive) = List.partition in_any_static movables in
   let create_explosions = List.map (explosion_from_body runtime) dead in
   let bullet_time = List.map (fun (a, _) -> a) create_explosions in

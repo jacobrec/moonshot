@@ -152,8 +152,8 @@ let draw_levelend model =
     | Victory -> "Victory!!"
     | DriftedAway -> "Lost in space :("
     | Died -> "You Died :(" in
-  let has_time_star = model.star_reqs.time > model.runtime in
-  let has_shot_star = model.star_reqs.shots > model.shots_taken in
+  let has_time_star = model.star_reqs.time >= model.runtime in
+  let has_shot_star = model.star_reqs.shots >= model.shots_taken in
   let has_health_star = model.star_reqs.health <= model.health in
   let make_star h b = h ^ ": " ^ (if b then "*" else "-") in
   let time_star = make_star "Time" has_time_star in
