@@ -135,5 +135,6 @@ let sofwv = screen_of_world_vector
 let wofsv = world_of_screen_vector
 
 let explosion_time = 1.0
-
+let explosion_mass = -100.0
+let explosion_radius = 3.0
 

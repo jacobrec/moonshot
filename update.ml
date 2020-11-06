@@ -190,7 +190,8 @@ let explosion_from_body time x =
   let open Body in
   let t = time -. x.created_at in
   let x = x.moving in
-  (t, {remaining=Moonshot.explosion_time; body={x.body with radius=3.0; mass= -100.0}})
+  (t, {remaining=Moonshot.explosion_time;
+       body={x.body with radius=Moonshot.explosion_radius; mass= Moonshot.explosion_mass}})
 
 let update_bullet delta bodies bullet =
   let open Body in
@@ -240,7 +241,12 @@ let update_playing_check_for_level_end model =
   let end_conditions = [
       ((fun _ -> model.player.health <= 0), Model.Died);
       ((fun _ -> let (x, y) = vector model.player.feet.body.pos in
-                 100.0 *. 100.0 < (x *. x +. y *. y)), Model.DriftedAway);
+                 not (List.exists (fun p -> let open Body in
+                                       ignore (p.is_painful);
+                                       let (px, py) = vector p.body.pos in
+                                       let dx, dy = (px -. x), (py -. y) in
+                                       100.0 *. 100.0 > (dx *. dx +. dy *. dy)
+                   ) model.static)), Model.DriftedAway);
       ((fun _ -> 0 = List.length model.enemies), Model.Victory);
     ] in
   match List.find_opt (fun (a, _) -> a ()) end_conditions with
@@ -266,8 +272,12 @@ let update_playing delta model =
                  List.map enemy_body enemies;
                  List.map bullet_body bullets;
                  List.map planet_body static]
-    in
-  let fading = List.map (fun x -> { x with remaining =  x.remaining -. delta}) fading in
+  in
+  let fading = List.map (fun x -> let percent = x.remaining /. Moonshot.explosion_time in
+                                  let r = Moonshot.explosion_radius /. 2.0 in
+                                  {remaining=x.remaining -. delta;
+                                   body={x.body with mass= percent *. Moonshot.explosion_mass;
+                                                     radius= r +. r *. percent}}) fading in
   let fading = List.filter (fun x -> x.remaining > 0.0) fading in
   let movables = List.map (update_bullet delta (body_set ~fading ~static ())) bullets in
   let in_any_static b1 = List.exists (fun b2 -> bodies_touch b1.moving.body b2)
