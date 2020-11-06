@@ -92,7 +92,7 @@ let level_two _ =
       {Enemy.loc={Body.body={Body.pos=vc 100.0 18.0; mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing};
     ] in
-  make_level "One" (-30.0) 0.0 bodies enemies {health=6; time=25.0; shots=4}
+  make_level "Two" (-30.0) 0.0 bodies enemies {health=6; time=25.0; shots=4}
 
 let load i =
   let levels = [
