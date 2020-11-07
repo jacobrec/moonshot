@@ -54,18 +54,24 @@ let input_paused model =
   else Model.Paused model
 
 let input_menu _ =
+  let keymap = [
+      (Key.One,   1);
+      (Key.Two,   2);
+      (Key.Three, 3);
+      (Key.Four,  4);
+      (Key.Five,  5);
+      (Key.Six,   6);
+      (Key.Seven, 7);
+      (Key.Eight, 8);
+      (Key.Nine,  9);
+      (Key.Zero,  0); (* Level 10 *)
+      (Key.Minus, 10);(* Level 11 *)
+      (Key.Equal, 11);(* Level 12 *)
+    ] in
   (* TODO: Graphical selector with buttons *)
-       if is_key_pressed Key.Zero  then Model.Playing (Level.load 0)
-  else if is_key_pressed Key.One   then Model.Playing (Level.load 1)
-  else if is_key_pressed Key.Two   then Model.Playing (Level.load 2)
-  else if is_key_pressed Key.Three then Model.Playing (Level.load 3)
-  else if is_key_pressed Key.Four  then Model.Playing (Level.load 4)
-  else if is_key_pressed Key.Five  then Model.Playing (Level.load 5)
-  else if is_key_pressed Key.Six   then Model.Playing (Level.load 6)
-  else if is_key_pressed Key.Seven then Model.Playing (Level.load 7)
-  else if is_key_pressed Key.Eight then Model.Playing (Level.load 8)
-  else if is_key_pressed Key.Nine  then Model.Playing (Level.load 9)
-  else Model.MenuScreen
+  match List.find_opt (fun (a, _) -> is_key_down a) keymap with
+  | None -> Model.MenuScreen
+  | Some (_, b) -> Model.Playing (Level.load b)
 
 let input_levelend p =
   if is_key_pressed Key.Space then Model.MenuScreen

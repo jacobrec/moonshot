@@ -241,12 +241,13 @@ let update_playing_check_for_level_end model =
   let end_conditions = [
       ((fun _ -> model.player.health <= 0), Model.Died);
       ((fun _ -> let (x, y) = vector model.player.feet.body.pos in
-                 not (List.exists (fun p -> let open Body in
-                                       ignore (p.is_painful);
-                                       let (px, py) = vector p.body.pos in
-                                       let dx, dy = (px -. x), (py -. y) in
-                                       100.0 *. 100.0 > (dx *. dx +. dy *. dy)
-                   ) model.static)), Model.DriftedAway);
+                 (x *. x +. y *. y) > 100.0 *. 100.0 &&
+                   not (List.exists (fun p -> let open Body in
+                                              ignore (p.is_painful);
+                                              let (px, py) = vector p.body.pos in
+                                              let dx, dy = (px -. x), (py -. y) in
+                                              100.0 *. 100.0 > (dx *. dx +. dy *. dy)
+                          ) model.static)), Model.DriftedAway);
       ((fun _ -> 0 = List.length model.enemies), Model.Victory);
     ] in
   match List.find_opt (fun (a, _) -> a ()) end_conditions with
