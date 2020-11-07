@@ -94,7 +94,7 @@ let level_three _ =
       {Enemy.loc={Body.body={Body.pos=vc (-85.0) (-85.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Three" (-15.0) 0.0 bodies enemies {health=6; time=5.0; shots=1}
+  make_level "Three" (-15.0) 0.0 bodies enemies {health=6; time=10.0; shots=1}
 
 let level_four _ =
   let bodies = [
@@ -110,7 +110,7 @@ let level_four _ =
       {Enemy.loc={Body.body={Body.pos=vc (130.0) (110.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Four" (-15.0) 0.0 bodies enemies {health=6; time=5.0; shots=1}
+  make_level "Four" (-15.0) 0.0 bodies enemies {health=6; time=15.0; shots=1}
 
 let level_five _ =
   let radii = 20.0 in
@@ -152,7 +152,7 @@ let level_six _ =
       {Enemy.loc={Body.body={Body.pos=vc (-103.0) (2.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Six" 14.0 2.0 bodies enemies {health=6; time=15.0; shots=1}
+  make_level "Six" 14.0 2.0 bodies enemies {health=6; time=13.0; shots=1}
 
 let level_seven _ =
   let bodies = [
@@ -163,7 +163,7 @@ let level_seven _ =
       {Enemy.loc={Body.body={Body.pos=vc (12.0) (0.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Seven" 6.0 0.0 bodies enemies {health=6; time=5.0; shots=1}
+  make_level "Seven" 6.0 0.0 bodies enemies {health=6; time=3.0; shots=1}
 
 let level_eight _ =
   let bodies = [
@@ -176,7 +176,7 @@ let level_eight _ =
       {Enemy.loc={Body.body={Body.pos=vc (50.0) (-2.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Eight" 6.0 0.0 bodies enemies {health=6; time=10.0; shots=1}
+  make_level "Eight" 6.0 0.0 bodies enemies {health=6; time=8.0; shots=1}
 
 let level_nine _ =
   let bodies = [
@@ -254,7 +254,7 @@ let level_twelve _ =
   let r1 = List.map (angle_to_enemy 5.0) (circle_angles 3) in
   let bodies = [] in
   let enemies = List.concat [r1] in
-  make_level "Twelve" (0.0) 0.0 bodies enemies {health=5; time=11.0; shots=3}
+  make_level "Twelve" (0.0) 0.0 bodies enemies {health=5; time=10.0; shots=3}
 
 let load i =
   let levels = [

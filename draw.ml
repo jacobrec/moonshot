@@ -140,7 +140,7 @@ let draw_menuscreen _ =
   begin_drawing ();
   clear_background Color.raywhite;
   draw_text "Main Menu" 10 10 14 Color.gray;
-  draw_text "Press 0-9 to select a level" 10 20 14 Color.gray;
+  draw_text "Press 0-9,-,= to select a level" 10 20 14 Color.gray;
   end_drawing ();
   Model.MenuScreen
 
