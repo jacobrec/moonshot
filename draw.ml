@@ -85,6 +85,31 @@ let draw_planet p =
   if pain then draw_circle_gradient px py pr color Color.red
   else draw_circle px py pr color
 
+let line_wrapped_text text font width =
+  let words = String.split_on_char ' ' text in
+  let lines = List.fold_left (fun lines x ->
+                  let lline = List.hd lines in
+                  let rest = List.tl lines in
+                  let lline_x = lline ^ x in
+                  let twidth = measure_text lline_x font in
+                  if twidth < width then (lline_x ^ " ") :: rest
+                  else (x ^ " ") :: lline :: rest
+                  ) [""] words in
+  let text = String.concat "\n" @@ List.rev lines in
+  let f = get_font_default () in
+  let base_size = Font.base_size f in
+  let spacing = ((float_of_int font) /. (float_of_int base_size)) in
+  let v = measure_text_ex f text (float_of_int font) spacing in
+  let (_, y) = vector v in
+  (text, font/2 + int_of_float y)
+
+let draw_text_box font x y width fg_color bg_color text =
+  let (text, height) = line_wrapped_text text font (width - font) in
+  draw_rectangle x y width height bg_color;
+  draw_text text (x + font) (font/2 + y) 0 fg_color
+
+let level_textbox = draw_text_box 12 200 0 200 Color.raywhite Color.darkgray
+
 let draw_playing model =
   let { Moonshot.Model.bullets=movables; static; fading;
         player={feet=pfeet; head=phead; input=inp; health}; enemies; cam; runtime; _} = model in
@@ -125,6 +150,9 @@ let draw_playing model =
 
   let trunc_time = (float_of_int (int_of_float (runtime *. 100.0))) /. 100.0 in
   draw_text (string_of_float trunc_time) (Moonshot.screen_width - 50) 10 14 Color.gold;
+
+  if runtime < 8.0 then
+    level_textbox model.start_text;
 
   end_drawing ();
   Model.Playing model

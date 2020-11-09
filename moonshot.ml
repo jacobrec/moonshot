@@ -64,6 +64,7 @@ module Model = struct
     }
 
   type playing = {
+      start_text : string;
       name : string;
       static : Body.planet list;
       bullets : Body.bullet list;

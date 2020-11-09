@@ -2,7 +2,7 @@ open Moonshot
 
 let vc = Raylib.Vector2.create
 
-let make_level name px py bodies enemies star_reqs =
+let make_level name start_text px py bodies enemies star_reqs =
   let movables = [] in
   let cam = Raylib.Camera2D.create (vc (float_of_int (screen_width / 2)) (float_of_int (screen_height / 2)))
               (vc 0.0 0.0) 0.0 1.0 in (* offset target rotation zoom *)
@@ -17,6 +17,7 @@ let make_level name px py bodies enemies star_reqs =
     } in
   { Model.static=bodies;
     name;
+    start_text;
     fading=[];
     enemies;
     cam;
@@ -30,7 +31,7 @@ let make_level name px py bodies enemies star_reqs =
 let level_blank _ =
   let bodies = [] in
   let enemies = [] in
-  make_level "404" 0.0 0.0 bodies enemies {health=8; time=0.0; shots=0}
+  make_level "404" "Level not found" 0.0 0.0 bodies enemies {health=8; time=0.0; shots=0}
 
 (* Level design plan *)
 (* There will be multiple worlds
@@ -70,7 +71,9 @@ let level_one _ =
       {Enemy.loc={Body.body={Body.pos=vc 15.0 0.0; mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "One" (-15.0) 0.0 bodies enemies {health=6; time=5.0; shots=1}
+  make_level "One"
+    "Click and drag away from your player to aim like a slingshot. Release to fire."
+    (-15.0) 0.0 bodies enemies {health=6; time=5.0; shots=1}
 
 let level_two _ =
   let bodies = [
@@ -81,7 +84,9 @@ let level_two _ =
       {Enemy.loc={Body.body={Body.pos=vc 15.0 0.0; mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Two" (-15.0) 0.0 bodies enemies {health=6; time=5.0; shots=1}
+  make_level "Two"
+    "Use A and S to move clockwise, and counter clockwise around the planet you're on"
+    (-15.0) 0.0 bodies enemies {health=6; time=5.0; shots=1}
 
 let level_three _ =
   let bodies = [
@@ -94,7 +99,9 @@ let level_three _ =
       {Enemy.loc={Body.body={Body.pos=vc (-85.0) (-85.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Three" (-15.0) 0.0 bodies enemies {health=6; time=10.0; shots=1}
+  make_level "Three"
+    "Press space to jump"
+    (-15.0) 0.0 bodies enemies {health=6; time=10.0; shots=1}
 
 let level_four _ =
   let bodies = [
@@ -110,7 +117,9 @@ let level_four _ =
       {Enemy.loc={Body.body={Body.pos=vc (130.0) (110.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Four" (-15.0) 0.0 bodies enemies {health=6; time=15.0; shots=1}
+  make_level "Four"
+    "Different planets have different densities. More mass means more gravity."
+    (-15.0) 0.0 bodies enemies {health=6; time=15.0; shots=1}
 
 let level_five _ =
   let radii = 20.0 in
@@ -130,7 +139,9 @@ let level_five _ =
       {Enemy.loc={Body.body={Body.pos=vc (-103.0) (2.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Five" 15.0 0.0 bodies enemies {health=6; time=10.0; shots=1}
+  make_level "Five"
+    "Jump just as you land to double (or triple) jump and go even higher."
+    15.0 0.0 bodies enemies {health=6; time=10.0; shots=1}
 
 let level_six _ =
   let radii = 20.0 in
@@ -152,7 +163,9 @@ let level_six _ =
       {Enemy.loc={Body.body={Body.pos=vc (-103.0) (2.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Six" 14.0 2.0 bodies enemies {health=6; time=13.0; shots=1}
+  make_level "Six"
+    "Some planets are painful to touch"
+    14.0 2.0 bodies enemies {health=6; time=13.0; shots=1}
 
 let level_seven _ =
   let bodies = [
@@ -163,7 +176,9 @@ let level_seven _ =
       {Enemy.loc={Body.body={Body.pos=vc (12.0) (0.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Seven" 6.0 0.0 bodies enemies {health=6; time=3.0; shots=1}
+  make_level "Seven"
+    "Careful, if you are not, you may get caught by your own shot."
+    6.0 0.0 bodies enemies {health=6; time=3.0; shots=1}
 
 let level_eight _ =
   let bodies = [
@@ -176,7 +191,9 @@ let level_eight _ =
       {Enemy.loc={Body.body={Body.pos=vc (50.0) (-2.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Eight" 6.0 0.0 bodies enemies {health=6; time=8.0; shots=1}
+  make_level "Eight"
+    "Some celetial bodies are extremely dense. You can restart the level through the pause menu (press p)"
+    6.0 0.0 bodies enemies {health=6; time=8.0; shots=1}
 
 let level_nine _ =
   let bodies = [
@@ -199,7 +216,9 @@ let level_nine _ =
       {Enemy.loc={Body.body={Body.pos=vc 110.0 28.0; mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing};
     ] in
-  make_level "Nine" (-10.0) 0.0 bodies enemies {health=6; time=12.0; shots=3}
+  make_level "Nine"
+    "You've learned all there is. Good luck. See if you can 3 star all the levels"
+    (-10.0) 0.0 bodies enemies {health=6; time=12.0; shots=3}
 
 let level_ten _ =
   let bodies = [
@@ -228,7 +247,9 @@ let level_ten _ =
       {Enemy.loc={Body.body={Body.pos=vc 100.0 18.0; mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing};
     ] in
-  make_level "Ten" (-30.0) 0.0 bodies enemies {health=6; time=25.0; shots=4}
+  make_level "Ten"
+    "Another level to test your skills"
+    (-30.0) 0.0 bodies enemies {health=6; time=25.0; shots=4}
 
 let level_eleven _ =
   let bodies = [
@@ -241,7 +262,9 @@ let level_eleven _ =
       {Enemy.loc={Body.body={Body.pos=vc 30.0 (-6.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Eleven" (-30.0) 0.0 bodies enemies {health=5; time=3.0; shots=1}
+  make_level "Eleven"
+    "Think fast!"
+    (-30.0) 0.0 bodies enemies {health=5; time=3.0; shots=1}
 
 let level_twelve _ =
   let x r theta = r *. Float.cos theta in
@@ -254,7 +277,9 @@ let level_twelve _ =
   let r1 = List.map (angle_to_enemy 5.0) (circle_angles 3) in
   let bodies = [] in
   let enemies = List.concat [r1] in
-  make_level "Twelve" (0.0) 0.0 bodies enemies {health=5; time=10.0; shots=3}
+  make_level "Twelve"
+    "Careful not to drift off too far"
+    (0.0) 0.0 bodies enemies {health=5; time=10.0; shots=3}
 
 let load i =
   let levels = [
