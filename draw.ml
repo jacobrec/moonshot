@@ -112,10 +112,13 @@ let line_wrapped_text text font width =
   (text, font/2 + y)
 
 
-let draw_text_box font x y width fg_color bg_color text =
+let draw_text_box ?(centered=false) font x y width fg_color bg_color text =
   let (text, height) = line_wrapped_text text font (width - font) in
+  let x = if centered then x - width/2 else x in
+  let y = if centered then y - height/2 else y in
   draw_rectangle x y (width+font) (height+font) bg_color;
   draw_centered_text text (x + width/2) (height/2 + y) font fg_color
+
 
 let box_width = 0.2
 let box_width = int_of_float (box_width *. (float_of_int Moonshot.screen_width))
@@ -178,6 +181,9 @@ let draw_paused model =
 
 
 let menu_starfield = Starfield.create 3 100
+let draw_menu_starfield _ =
+  Starfield.draw menu_starfield (10.0 *. get_time ()) (get_time ())
+    (Moonshot.sofw 1.0) Color.raywhite
 let draw_menuscreen _ =
   let f_color = Color.raywhite in
   let b_color = Color.black in
@@ -188,7 +194,7 @@ let draw_menuscreen _ =
   let big_font_size = big_size * Moonshot.font_size in
   begin_drawing ();
   clear_background b_color;
-  Starfield.draw menu_starfield (10.0 *. get_time ()) (get_time ()) (Moonshot.sofw 1.0) Color.raywhite;
+  draw_menu_starfield ();
   draw_centered_text "Starshot" (Moonshot.screen_width / 2) (Moonshot.screen_height / 3)
     big_font_size f_color;
   draw_centered_text "Press [0-9,-,=] to select a level"
@@ -202,8 +208,12 @@ let draw_menuscreen _ =
 
 let draw_levelend model =
   let open Moonshot.Model in
+  let fcolor = Color.raywhite in
+  let bcolor = Color.create 49 49 49 200 in
   begin_drawing ();
-  clear_background Color.raywhite;
+  clear_background Color.black;
+  draw_menu_starfield ();
+
   let msg = match model.reason with
     | Victory -> "Victory!!"
     | DriftedAway -> "Lost in space :("
@@ -219,7 +229,10 @@ let draw_levelend model =
               model.name msg model.shots_taken model.runtime
               (float_of_int (6-model.health) /. 2.0) model.longest_bullet
               health_star time_star shot_star in
-  draw_text msg 10 10 14 Color.gray;
+  let width = (3*Moonshot.screen_width/4) in
+  let cx = Moonshot.screen_width / 2 in
+  let cy = Moonshot.screen_height / 2 in
+  draw_text_box ~centered:true (Moonshot.font_size * 2) cx cy width fcolor bcolor msg;
   end_drawing ();
   Model.LevelEnd model
 
