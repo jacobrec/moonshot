@@ -20,12 +20,15 @@ let create layer_count total_count : t =
                 ) layers in
   List.flatten stars
 
+let nmod a b =
+  ((a mod b) + b) mod b
+
 let draw field vx vy pixel_size color =
   List.iter (fun (x, y, z) ->
       let tx = x +. vx *. z in
       let ty = y +. vy *. z in
-      let ix = ((pixel_size * int_of_float tx) mod width) - (5 * pixel_size) in
-      let iy = ((pixel_size * int_of_float ty) mod height) - (5 * pixel_size) in
+      let ix = ((nmod) (pixel_size * int_of_float tx) width) - (5 * pixel_size) in
+      let iy = ((nmod) (pixel_size * int_of_float ty) height) - (5 * pixel_size) in
       let iz = pixel_size * int_of_float z in
       Raylib.draw_rectangle ix iy iz iz color
     ) field

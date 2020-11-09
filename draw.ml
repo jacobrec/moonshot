@@ -57,7 +57,7 @@ let draw_aim_assist bodies dots freq ax ay player =
       | [] -> [] in
     inner f l 0 in
   let every_few = filteri (fun i _ -> i mod (int_of_float (freq /. timing) + 1) = 0) all in
-  List.iter (fun x -> let open Moonshot.Body in draw_body Color.gray x.body) every_few
+  List.iter (fun x -> let open Moonshot.Body in draw_body Color.darkgray x.body) every_few
 
 let draw_enemy e =
   let open Moonshot.Enemy in
@@ -125,15 +125,23 @@ let box_width = int_of_float (box_width *. (float_of_int Moonshot.screen_width))
 let level_textbox = draw_text_box Moonshot.font_size ((Moonshot.screen_width-box_width) / 2) 0
                       box_width Color.raywhite Color.darkgray
 
+let draw_playing_starfield stars px py =
+  let star_backoff = 4.0 in
+  let (px, py) = (px /. star_backoff, py /. star_backoff) in
+  Starfield.draw stars px py (Moonshot.sofw (1.0 /. star_backoff)) Color.raywhite
+
 let draw_playing model =
   let { Moonshot.Model.bullets=movables; static; fading;
         player={feet=pfeet; head=phead; input=inp; health}; enemies; cam; runtime; _} = model in
   let player = model.player in
   begin_drawing ();
+  clear_background Color.black;
+  (* IDK if the starfield effect actually looks good*)
+  let (px, py) = vector phead.body.pos in
+  draw_playing_starfield model.stars px py;
   begin_mode_2d cam;
-  clear_background Color.raywhite;
   List.iter draw_planet static;
-  List.iter (fun x -> let open Moonshot.Body in draw_body Color.black x.moving.body) movables;
+  List.iter (fun x -> let open Moonshot.Body in draw_body Color.gray x.moving.body) movables;
   List.iter draw_explosion fading;
   List.iter (draw_body Color.lime) @@
     List.map (fun x -> let open Moonshot.Body in x.body) [phead; pfeet];
@@ -172,15 +180,30 @@ let draw_playing model =
   end_drawing ();
   Model.Playing model
 
+let line_drawer font cx sy color =
+  let offset = ref 0 in
+  let draw_line ?(size=font) text =
+    draw_centered_text text cx (sy + !offset) size color;
+    offset  := !offset + size in
+  draw_line
+
 let draw_paused model =
+  let open Model in
   begin_drawing ();
-  clear_background Color.raywhite;
-  draw_text "Paused\n(R)estart\nRe(s)ume\n(Q)uit" 10 10 14 Color.gray;
+  clear_background Color.black;
+  let (px, py) = vector model.player.head.body.pos in
+  draw_playing_starfield model.stars px py;
+  let ld = line_drawer (Moonshot.font_size*3)
+             (Moonshot.screen_width/2) (Moonshot.screen_height/4) Color.raywhite in
+  ld ~size:(Moonshot.font_size*6) "Paused";
+  ld "(R)estart";
+  ld "Re(s)ume";
+  ld "(Q)uit";
   end_drawing ();
   Model.Paused model
 
 
-let menu_starfield = Starfield.create 3 100
+let menu_starfield = Starfield.create 3 50
 let draw_menu_starfield _ =
   Starfield.draw menu_starfield (10.0 *. get_time ()) (get_time ())
     (Moonshot.sofw 1.0) Color.raywhite

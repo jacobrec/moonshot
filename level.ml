@@ -17,19 +17,21 @@ let make_level id name start_text px py bodies enemies star_reqs =
       input=Player.None;
       Player.health=6;
     } in
+  let stars = Starfield.create 8 400 in
   let level = { Model.static=bodies;
-    name;
-    id;
-    start_text;
-    fading=[];
-    enemies;
-    cam;
-    player=make_player px py;
-    runtime=0.0;
-    shots_taken=0;
-    longest_bullet=0.0;
-    star_reqs;
-    bullets=movables } in
+                stars;
+                name;
+                id;
+                start_text;
+                fading=[];
+                enemies;
+                cam;
+                player=make_player px py;
+                runtime=0.0;
+                shots_taken=0;
+                longest_bullet=0.0;
+                star_reqs;
+                bullets=movables } in
   if Hashtbl.mem level_map id then begin
       print_endline "ERROR: Level id is already taken. Please choose a unique ID";
       invalid_arg "make_level"

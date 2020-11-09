@@ -67,6 +67,7 @@ module Model = struct
       start_text : string;
       name : string;
       id : int;
+      stars : Starfield.t;
       static : Body.planet list;
       bullets : Body.bullet list;
       fading : Body.fading list;
