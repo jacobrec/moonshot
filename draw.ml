@@ -85,6 +85,18 @@ let draw_planet p =
   if pain then draw_circle_gradient px py pr color Color.red
   else draw_circle px py pr color
 
+let measure_text_wh text size =
+  let f = get_font_default () in
+  let base_size = Font.base_size f in
+  let spacing = ((float_of_int size) /. (float_of_int base_size)) in
+  let v = measure_text_ex f text (float_of_int size) spacing in
+  let (fx, fy) = vector v in
+  (int_of_float fx, int_of_float fy)
+
+let draw_centered_text text cx cy font color =
+  let (width, height) = measure_text_wh text font in
+  draw_text text (cx - width / 2) (cy - height / 2) font color
+
 let line_wrapped_text text font width =
   let words = String.split_on_char ' ' text in
   let lines = List.fold_left (fun lines x ->
@@ -96,17 +108,14 @@ let line_wrapped_text text font width =
                   else (x ^ " ") :: lline :: rest
                   ) [""] words in
   let text = String.concat "\n" @@ List.rev lines in
-  let f = get_font_default () in
-  let base_size = Font.base_size f in
-  let spacing = ((float_of_int font) /. (float_of_int base_size)) in
-  let v = measure_text_ex f text (float_of_int font) spacing in
-  let (_, y) = vector v in
-  (text, font/2 + int_of_float y)
+  let (_, y) = measure_text_wh text font in
+  (text, font/2 + y)
+
 
 let draw_text_box font x y width fg_color bg_color text =
   let (text, height) = line_wrapped_text text font (width - font) in
   draw_rectangle x y (width+font) (height+font) bg_color;
-  draw_text text (x + font) (font/2 + y) font fg_color
+  draw_centered_text text (x + width/2) (height/2 + y) font fg_color
 
 let box_width = 0.2
 let box_width = int_of_float (box_width *. (float_of_int Moonshot.screen_width))
@@ -167,11 +176,27 @@ let draw_paused model =
   end_drawing ();
   Model.Paused model
 
+
+let menu_starfield = Starfield.create 3 100
 let draw_menuscreen _ =
+  let f_color = Color.raywhite in
+  let b_color = Color.black in
+  let big_size = 10 in
+  let little_size = 3 in
+
+  let little_font_size = little_size * Moonshot.font_size in
+  let big_font_size = big_size * Moonshot.font_size in
   begin_drawing ();
-  clear_background Color.raywhite;
-  draw_text "Main Menu" 10 10 14 Color.gray;
-  draw_text "Press 0-9,-,= to select a level" 10 20 14 Color.gray;
+  clear_background b_color;
+  Starfield.draw menu_starfield (10.0 *. get_time ()) (get_time ()) (Moonshot.sofw 1.0) Color.raywhite;
+  draw_centered_text "Starshot" (Moonshot.screen_width / 2) (Moonshot.screen_height / 3)
+    big_font_size f_color;
+  draw_centered_text "Press [0-9,-,=] to select a level"
+    (Moonshot.screen_width / 2) (3 * Moonshot.screen_height / 4)
+    little_font_size f_color;
+  draw_centered_text "Press [space] to view stats"
+    (Moonshot.screen_width / 2) (3 * Moonshot.screen_height / 4 + little_font_size)
+    little_font_size f_color;
   end_drawing ();
   Model.MenuScreen
 
