@@ -100,9 +100,10 @@ module Model = struct
     | MenuScreen
 end
 
-let ssize = 65
+let ssize = 55
 let screen_width = 16 * ssize
 let screen_height = 9 * ssize
+let font_size = ssize * 12 / 65
 
 let pixels_per_meter = float_of_int ssize /. 10.0
 let meters_per_pixel = 1.0 /. pixels_per_meter

@@ -105,10 +105,13 @@ let line_wrapped_text text font width =
 
 let draw_text_box font x y width fg_color bg_color text =
   let (text, height) = line_wrapped_text text font (width - font) in
-  draw_rectangle x y width height bg_color;
-  draw_text text (x + font) (font/2 + y) 0 fg_color
+  draw_rectangle x y (width+font) (height+font) bg_color;
+  draw_text text (x + font) (font/2 + y) font fg_color
 
-let level_textbox = draw_text_box 12 200 0 200 Color.raywhite Color.darkgray
+let box_width = 0.2
+let box_width = int_of_float (box_width *. (float_of_int Moonshot.screen_width))
+let level_textbox = draw_text_box Moonshot.font_size ((Moonshot.screen_width-box_width) / 2) 0
+                      box_width Color.raywhite Color.darkgray
 
 let draw_playing model =
   let { Moonshot.Model.bullets=movables; static; fading;
