@@ -66,6 +66,7 @@ module Model = struct
   type playing = {
       start_text : string;
       name : string;
+      id : int;
       static : Body.planet list;
       bullets : Body.bullet list;
       fading : Body.fading list;

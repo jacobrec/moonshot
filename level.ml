@@ -2,7 +2,9 @@ open Moonshot
 
 let vc = Raylib.Vector2.create
 
-let make_level name start_text px py bodies enemies star_reqs =
+let level_map = Hashtbl.create 12
+
+let make_level id name start_text px py bodies enemies star_reqs =
   let movables = [] in
   let cam = Raylib.Camera2D.create (vc (float_of_int (screen_width / 2)) (float_of_int (screen_height / 2)))
               (vc 0.0 0.0) 0.0 1.0 in (* offset target rotation zoom *)
@@ -15,8 +17,9 @@ let make_level name start_text px py bodies enemies star_reqs =
       input=Player.None;
       Player.health=6;
     } in
-  { Model.static=bodies;
+  let level = { Model.static=bodies;
     name;
+    id;
     start_text;
     fading=[];
     enemies;
@@ -26,12 +29,19 @@ let make_level name start_text px py bodies enemies star_reqs =
     shots_taken=0;
     longest_bullet=0.0;
     star_reqs;
-    bullets=movables }
+    bullets=movables } in
+  if Hashtbl.mem level_map id then begin
+      print_endline "ERROR: Level id is already taken. Please choose a unique ID";
+      invalid_arg "make_level"
+    end;
+  Hashtbl.add level_map id level
 
-let level_blank _ =
+
+let () =
   let bodies = [] in
   let enemies = [] in
-  make_level "404" "Level not found" 0.0 0.0 bodies enemies {health=8; time=0.0; shots=0}
+  make_level 0 "404" "Level not found" 0.0 0.0 bodies enemies {health=8; time=0.0; shots=0}
+let blank_level = Hashtbl.find level_map 0
 
 (* Level design plan *)
 (* There will be multiple worlds
@@ -60,7 +70,7 @@ let level_blank _ =
  * 1-12) Zero G shooting Challenge
 *)
 
-let level_one _ =
+let () =
   let bodies = [
       {Body.is_painful=false;
        body={Body.pos=vc (-30.0) 0.0; mass=900.0; radius=15.0;}};
@@ -71,11 +81,11 @@ let level_one _ =
       {Enemy.loc={Body.body={Body.pos=vc 15.0 0.0; mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "One"
+  make_level 1 "One"
     "Click and drag away from your player to aim like a slingshot. Release to fire."
     (-15.0) 0.0 bodies enemies {health=6; time=5.0; shots=1}
 
-let level_two _ =
+let () =
   let bodies = [
       {Body.is_painful=false;
        body={Body.pos=vc 0.0 0.0; mass=1800.0; radius=15.0;}};
@@ -84,11 +94,11 @@ let level_two _ =
       {Enemy.loc={Body.body={Body.pos=vc 15.0 0.0; mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Two"
+  make_level 2 "Two"
     "Use A and S to move clockwise, and counter clockwise around the planet you're on"
     (-15.0) 0.0 bodies enemies {health=6; time=5.0; shots=1}
 
-let level_three _ =
+let () =
   let bodies = [
       {Body.is_painful=false; body={Body.pos=vc    0.0     0.0; mass=1000.0; radius=15.0;}};
       {Body.is_painful=false; body={Body.pos=vc (-30.0) (-30.0); mass=1000.0; radius=15.0;}};
@@ -99,11 +109,11 @@ let level_three _ =
       {Enemy.loc={Body.body={Body.pos=vc (-85.0) (-85.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Three"
+  make_level 3 "Three"
     "Press space to jump"
     (-15.0) 0.0 bodies enemies {health=6; time=10.0; shots=1}
 
-let level_four _ =
+let () =
   let bodies = [
       {Body.is_painful=false; body={Body.pos=vc    0.0    0.0; mass=400.0;  radius=10.0;}};
       {Body.is_painful=false; body={Body.pos=vc   35.0   10.0; mass=600.0;  radius=10.0;}};
@@ -117,11 +127,11 @@ let level_four _ =
       {Enemy.loc={Body.body={Body.pos=vc (130.0) (110.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Four"
+  make_level 4 "Four"
     "Different planets have different densities. More mass means more gravity."
     (-15.0) 0.0 bodies enemies {health=6; time=15.0; shots=1}
 
-let level_five _ =
+let () =
   let radii = 20.0 in
   let x theta = radii *. Float.cos theta in
   let y theta = radii *. Float.sin theta in
@@ -139,11 +149,11 @@ let level_five _ =
       {Enemy.loc={Body.body={Body.pos=vc (-103.0) (2.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Five"
+  make_level 5 "Five"
     "Jump just as you land to double (or triple) jump and go even higher."
     15.0 0.0 bodies enemies {health=6; time=10.0; shots=1}
 
-let level_six _ =
+let () =
   let radii = 20.0 in
   let x theta = radii *. Float.cos theta in
   let y theta = radii *. Float.sin theta in
@@ -163,11 +173,11 @@ let level_six _ =
       {Enemy.loc={Body.body={Body.pos=vc (-103.0) (2.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Six"
+  make_level 6 "Six"
     "Some planets are painful to touch"
     14.0 2.0 bodies enemies {health=6; time=13.0; shots=1}
 
-let level_seven _ =
+let () =
   let bodies = [
       {Body.is_painful=false; body={Body.pos=vc 0.0 0.0; mass=600.0;  radius=6.0;}};
       {Body.is_painful=false; body={Body.pos=vc 18.0 0.0; mass=600.0;  radius=6.0;}};
@@ -176,11 +186,11 @@ let level_seven _ =
       {Enemy.loc={Body.body={Body.pos=vc (12.0) (0.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Seven"
+  make_level 7 "Seven"
     "Careful, if you are not, you may get caught by your own shot."
     6.0 0.0 bodies enemies {health=6; time=3.0; shots=1}
 
-let level_eight _ =
+let () =
   let bodies = [
       {Body.is_painful=false; body={Body.pos=vc 0.0 0.0; mass=600.0;  radius=8.0;}};
       {Body.is_painful=false; body={Body.pos=vc 20.0 10.0; mass=1200.0;  radius=2.0;}};
@@ -191,11 +201,11 @@ let level_eight _ =
       {Enemy.loc={Body.body={Body.pos=vc (50.0) (-2.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Eight"
+  make_level 8 "Eight"
     "Some celetial bodies are extremely dense. You can restart the level through the pause menu (press p)"
     6.0 0.0 bodies enemies {health=6; time=8.0; shots=1}
 
-let level_nine _ =
+let () =
   let bodies = [
       {Body.is_painful=false; body={Body.pos=vc 0.0 0.0; mass=900.0; radius=10.0;}};
       {Body.is_painful=false; body={Body.pos=vc 40.0 0.0; mass=1200.0; radius=10.0;}};
@@ -216,11 +226,11 @@ let level_nine _ =
       {Enemy.loc={Body.body={Body.pos=vc 110.0 28.0; mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing};
     ] in
-  make_level "Nine"
+  make_level 9 "Nine"
     "You've learned all there is. Good luck. See if you can 3 star all the levels"
     (-10.0) 0.0 bodies enemies {health=6; time=12.0; shots=3}
 
-let level_ten _ =
+let () =
   let bodies = [
       {Body.is_painful=false; body={Body.pos=vc (-15.0) (  0.0); mass=500.0; radius=7.0;}};
       {Body.is_painful=false; body={Body.pos=vc ( 15.0) ( 15.0); mass=500.0; radius=7.0;}};
@@ -247,11 +257,11 @@ let level_ten _ =
       {Enemy.loc={Body.body={Body.pos=vc 100.0 18.0; mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing};
     ] in
-  make_level "Ten"
+  make_level 10 "Ten"
     "Another level to test your skills"
     (-30.0) 0.0 bodies enemies {health=6; time=25.0; shots=4}
 
-let level_eleven _ =
+let () =
   let bodies = [
       {Body.is_painful=true;
        body={Body.pos=vc 0.0 0.0; mass=900.0; radius=10.0;}};
@@ -262,11 +272,11 @@ let level_eleven _ =
       {Enemy.loc={Body.body={Body.pos=vc 30.0 (-6.0); mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level "Eleven"
+  make_level 11 "Eleven"
     "Think fast!"
     (-30.0) 0.0 bodies enemies {health=5; time=3.0; shots=1}
 
-let level_twelve _ =
+let () =
   let x r theta = r *. Float.cos theta in
   let y r theta = r *. Float.sin theta in
   let circle_angles count = List.init count (fun i -> (float_of_int i) *. Float.pi *. 2.0 /. (float_of_int count)) in
@@ -277,26 +287,12 @@ let level_twelve _ =
   let r1 = List.map (angle_to_enemy 5.0) (circle_angles 3) in
   let bodies = [] in
   let enemies = List.concat [r1] in
-  make_level "Twelve"
+  make_level 12 "Twelve"
     "Careful not to drift off too far"
     (0.0) 0.0 bodies enemies {health=5; time=10.0; shots=3}
 
 let load i =
-  let levels = [
-      level_ten;
-      level_one;
-      level_two;
-      level_three;
-      level_four;
-      level_five;
-      level_six;
-      level_seven;
-      level_eight;
-      level_nine;
-      level_eleven;
-      level_twelve;
-    ] in
-  match List.nth_opt levels i with
-  | Some l -> l ()
-  | _ -> level_blank ()
+  match Hashtbl.find_opt level_map i with
+  | Some l -> l
+  | None -> blank_level
 

@@ -163,7 +163,7 @@ let draw_playing model =
 let draw_paused model =
   begin_drawing ();
   clear_background Color.raywhite;
-  draw_text "Paused" 10 10 14 Color.gray;
+  draw_text "Paused\n(R)estart\nRe(s)ume\n(Q)uit" 10 10 14 Color.gray;
   end_drawing ();
   Model.Paused model
 

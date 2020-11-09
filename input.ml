@@ -50,8 +50,13 @@ let input_paused model =
                  is_key_pressed Key.P ||
                  is_key_pressed Key.A ||
                  is_key_pressed Key.S in
-  if unpaused then Model.Playing model
-  else Model.Paused model
+  let quit = is_key_pressed Key.Q in
+  let restart = is_key_pressed Key.R in
+  let open Model in
+  if quit then MenuScreen
+  else if restart then Playing (Level.load model.id)
+  else if unpaused then Playing model
+  else Paused model
 
 let input_menu _ =
   let keymap = [
@@ -64,9 +69,9 @@ let input_menu _ =
       (Key.Seven, 7);
       (Key.Eight, 8);
       (Key.Nine,  9);
-      (Key.Zero,  0); (* Level 10 *)
-      (Key.Minus, 10);(* Level 11 *)
-      (Key.Equal, 11);(* Level 12 *)
+      (Key.Zero,  10); (* Level 10 *)
+      (Key.Minus, 11);(* Level 11 *)
+      (Key.Equal, 12);(* Level 12 *)
     ] in
   (* TODO: Graphical selector with buttons *)
   match List.find_opt (fun (a, _) -> is_key_down a) keymap with
