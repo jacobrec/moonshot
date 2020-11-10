@@ -350,6 +350,23 @@ let () = (* Level 2 *)
     "Use the gravity of planets to shoot places you couldn't otherwise reach"
     (-5.0) 0.0 bodies enemies {health=6; time=20.0; shots=3}
 
+let () = (* Level 3 *)
+  let bodies = [
+      {Body.surface=Body.Sticky; body={Body.pos=vc 0.0 0.0; mass=1000.0; radius=10.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 18.0 2.0; mass=200.0; radius=2.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 26.0 (-2.0); mass=200.0; radius=2.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 34.0 (2.0); mass=200.0; radius=2.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 40.0 0.0; mass=200.0; radius=2.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 30.0 20.0; mass=100.0; radius=15.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 30.0 (-20.0); mass=100.0; radius=15.0;}};
+    ] in
+  let enemies = [
+      make_slime 42.0 0.0;
+    ] in
+  make_level 103 "Three"
+    "Black holes ahead, good thing you're too stuck to get sucked in"
+    (10.0) 0.0 bodies enemies {health=6; time=5.0; shots=1}
+
 
 let () = (* Level rest *)
   let bodies = [
@@ -359,9 +376,6 @@ let () = (* Level rest *)
       {Enemy.loc={Body.body={Body.pos=vc 5.0 0.0; mass=1.0; radius=1.0;};
                   vel=vc 0.0 0.0}; action=Standing}
     ] in
-  make_level 103 "Three"
-    "TODO: make a level"
-    (-5.0) 0.0 bodies enemies {health=6; time=10.0; shots=1};
   make_level 104 "Four"
     "TODO: make a level"
     (-5.0) 0.0 bodies enemies {health=6; time=10.0; shots=1};
