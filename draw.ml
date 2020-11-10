@@ -182,8 +182,8 @@ let draw_playing model =
 
 let line_drawer font cx sy color =
   let offset = ref 0 in
-  let draw_line ?(size=font) text =
-    draw_centered_text text cx (sy + !offset) size color;
+  let draw_line ?(size=font) ?(centered=true) text =
+    (if centered then draw_centered_text else draw_text) text cx (sy + !offset) size color;
     offset  := !offset + size in
   draw_line
 
@@ -220,7 +220,7 @@ let draw_menuscreen _ =
   draw_menu_starfield ();
   draw_centered_text "Starshot" (Moonshot.screen_width / 2) (Moonshot.screen_height / 3)
     big_font_size f_color;
-  draw_centered_text "Press [0-9,-,=] to select a level"
+  draw_centered_text "Press [space] to play"
     (Moonshot.screen_width / 2) (3 * Moonshot.screen_height / 4)
     little_font_size f_color;
   draw_centered_text "Press [s] to view stats"
@@ -320,6 +320,68 @@ let draw_stats p =
   end_drawing ();
   Model.StatsScreen p
 
+let draw_worldselect _ =
+  let f_color = Color.raywhite in
+  let b_color = Color.black in
+  begin_drawing ();
+  clear_background b_color;
+  draw_menu_starfield ();
+
+  let bcolor = Color.create 49 49 49 200 in
+  let width = 3 * Moonshot.screen_width / 4 in
+  let height = 3 * Moonshot.screen_height / 4 in
+  let cx = Moonshot.screen_width / 2 in
+  let cy = Moonshot.screen_height / 2 in
+  draw_rectangle (cx - width / 2) (cy - height / 2) width height bcolor;
+
+  let ifmul a b = int_of_float ((float_of_int a) *. b) in
+  let ld = line_drawer (ifmul Moonshot.font_size 1.8)
+             (Moonshot.screen_width/2) (Moonshot.screen_height/4) f_color in
+  ld ~size:(Moonshot.font_size*4) "World Select";
+  ld "Press [space] to return to main menu";
+  ld "Press [0-9] to select a world";
+  end_drawing ();
+  Model.WorldSelect
+
+let draw_levelselect w =
+  let f_color = Color.raywhite in
+  let b_color = Color.black in
+  begin_drawing ();
+  clear_background b_color;
+  draw_menu_starfield ();
+
+  let bcolor = Color.create 49 49 49 200 in
+  let width = 3 * Moonshot.screen_width / 4 in
+  let height = 3 * Moonshot.screen_height / 4 in
+  let cx = Moonshot.screen_width / 2 in
+  let cy = Moonshot.screen_height / 2 in
+  draw_rectangle (cx - width / 2) (cy - height / 2) width height bcolor;
+
+  let ifmul a b = int_of_float ((float_of_int a) *. b) in
+  let ld = line_drawer (ifmul Moonshot.font_size 2.0)
+             (Moonshot.screen_width/2) (Moonshot.screen_height/4) f_color in
+  ld ~size:(Moonshot.font_size*4) ("World "^(string_of_int (w/100))^" Level Select");
+  ld "Press [space] to return to world select";
+  ld "Press [0-9,-,=] to select a level";
+  let lld_y = (Moonshot.screen_height/2) in
+  let ldl = line_drawer (ifmul Moonshot.font_size 2.0)
+             (5*Moonshot.screen_width/16) lld_y f_color in
+  let ldr = line_drawer (ifmul Moonshot.font_size 2.0)
+             (9*Moonshot.screen_width/16) lld_y f_color in
+  let keys = ["1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "0"; "-"; "="] in
+  List.iter (fun level ->
+      let (s1, s2, s3) = Savedata.level (w - 100 + level) in
+      let star b = if b then "*" else "-" in
+      (if level mod 2 = 1 then ldl else ldr)
+        ~centered:false (Printf.sprintf "[%s] Level %d (%s%s%s)" (List.nth keys (level-1)) level
+                         (star s1) (star s2) (star s3)
+        );
+    ) (List.init 12 (fun i -> i+1));
+  end_drawing ();
+
+  Model.LevelSelect w
+
+
 let draw model =
   match model with
   | Model.Paused p -> draw_paused p
@@ -327,3 +389,5 @@ let draw model =
   | Model.MenuScreen -> draw_menuscreen ()
   | Model.StatsScreen p -> draw_stats p
   | Model.LevelEnd p -> draw_levelend p
+  | Model.WorldSelect -> draw_worldselect ()
+  | Model.LevelSelect w -> draw_levelselect w

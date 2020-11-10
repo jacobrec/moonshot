@@ -100,6 +100,8 @@ module Model = struct
     | Playing of playing
     | Paused of playing
     | LevelEnd of endstats
+    | WorldSelect
+    | LevelSelect of int
     | MenuScreen
     | StatsScreen of int Option.t
 end

@@ -59,25 +59,11 @@ let input_paused model =
   else Paused model
 
 let input_menu _ =
-  let keymap = [
-      (Key.One,   1);
-      (Key.Two,   2);
-      (Key.Three, 3);
-      (Key.Four,  4);
-      (Key.Five,  5);
-      (Key.Six,   6);
-      (Key.Seven, 7);
-      (Key.Eight, 8);
-      (Key.Nine,  9);
-      (Key.Zero,  10); (* Level 10 *)
-      (Key.Minus, 11);(* Level 11 *)
-      (Key.Equal, 12);(* Level 12 *)
-    ] in
   (* TODO: Graphical selector with buttons *)
-  match List.find_opt (fun (a, _) -> is_key_down a) keymap with
-  | None when is_key_pressed Key.S -> Model.StatsScreen None
-  | None -> Model.MenuScreen
-  | Some (_, b) -> Model.Playing (Level.load b)
+  match true with
+  | _ when is_key_pressed Key.Space -> Model.WorldSelect
+  | _ when is_key_pressed Key.S -> Model.StatsScreen None
+  | _ -> Model.MenuScreen
 
 let input_stats p =
   let keymap = [
@@ -94,7 +80,7 @@ let input_stats p =
       (Key.Minus, 11);(* Level 11 *)
       (Key.Equal, 12);(* Level 12 *)
     ] in
-  match List.find_opt (fun (a, _) -> is_key_down a) keymap with
+  match List.find_opt (fun (a, _) -> is_key_pressed a) keymap with
   | None when is_key_pressed Key.Space -> Model.MenuScreen
   | None -> Model.StatsScreen p
   | Some (_, b) -> Model.StatsScreen (Some b)
@@ -103,6 +89,46 @@ let input_levelend p =
   if is_key_pressed Key.Space then Model.MenuScreen
   else Model.LevelEnd p
 
+let input_level p =
+  let keymap = [
+      (Key.One,   1);
+      (Key.Two,   2);
+      (Key.Three, 3);
+      (Key.Four,  4);
+      (Key.Five,  5);
+      (Key.Six,   6);
+      (Key.Seven, 7);
+      (Key.Eight, 8);
+      (Key.Nine,  9);
+      (Key.Zero,  10); (* Level 10 *)
+      (Key.Minus, 11);(* Level 11 *)
+      (Key.Equal, 12);(* Level 12 *)
+    ] in
+  match List.find_opt (fun (a, _) -> is_key_pressed a) keymap with
+  | None when is_key_pressed Key.Space -> Model.WorldSelect
+  | None -> Model.LevelSelect p
+  | Some (_, b) -> Model.Playing (Level.load ((p-100) + b))
+
+let input_world _ =
+  let keymap = [
+      (Key.One,   1);
+      (Key.Two,   2);
+      (Key.Three, 3);
+      (Key.Four,  4);
+      (Key.Five,  5);
+      (Key.Six,   6);
+      (Key.Seven, 7);
+      (Key.Eight, 8);
+      (Key.Nine,  9);
+      (Key.Zero,  10); (* Level 10 *)
+      (Key.Minus, 11);(* Level 11 *)
+      (Key.Equal, 12);(* Level 12 *)
+    ] in
+  match List.find_opt (fun (a, _) -> is_key_pressed a) keymap with
+  | None when is_key_pressed Key.Space -> Model.MenuScreen
+  | None -> Model.WorldSelect
+  | Some (_, b) -> Model.LevelSelect (b * 100)
+
 let input model =
   match model with
   | Model.Paused p -> input_paused p
@@ -110,3 +136,5 @@ let input model =
   | Model.MenuScreen -> input_menu ()
   | Model.StatsScreen p -> input_stats p
   | Model.LevelEnd p -> input_levelend p
+  | Model.WorldSelect -> input_world ()
+  | Model.LevelSelect world -> input_level world

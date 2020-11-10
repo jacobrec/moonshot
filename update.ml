@@ -308,6 +308,8 @@ let update delta model =
   match model with
   | Model.Paused p -> Model.Paused p
   | Model.Playing p -> update_playing delta p
+  | Model.WorldSelect -> Model.WorldSelect
+  | Model.LevelSelect p -> Model.LevelSelect p
   | Model.MenuScreen -> Model.MenuScreen
   | Model.StatsScreen p -> Model.StatsScreen p
   | Model.LevelEnd p -> Model.LevelEnd p
