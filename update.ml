@@ -74,7 +74,7 @@ let rotate theta (x, y) =
   let y' = -.(x *. Float.sin theta) +. (y *. Float.cos theta) in
   (x', y')
 
-let update_planet_collidable ?(inp=None) delta bodies base =
+let update_planet_collidable ?(inp=None) ?(no_forces=false) delta bodies base =
   let open Moonshot.Body in
 
   let b = base in
@@ -129,7 +129,8 @@ let update_planet_collidable ?(inp=None) delta bodies base =
   let b'' = accelerate_moving_body delta b' (b_accx, b_accy) in
 
 
-  (b'', (b_fx, b_fy))
+  let b''' = if no_forces then b' else b'' in
+  (b''', (b_fx, b_fy))
 
 let update_player delta bodies static fading player =
   let {Moonshot.Player.head=float; feet=base; input; health; last_damaged_at} = player in
@@ -210,6 +211,7 @@ let update_enemies delta bodies fading enemies =
   let open Moonshot.Body in
   let in_any_explosion b1 = List.exists (fun b2 -> ignore(b2.remaining);
                                                    bodies_touch b1.loc.body b2.body) fading in
+  let on_a_planet b1 = List.exists (fun b2 -> bodies_touch b1.loc.body b2) bodies in
   let enemies = List.map (fun x -> if in_any_explosion x then (* check if dead *)
                                      {x with action=Dead 2.0} else x) enemies in
   let enemies = List.map (fun x -> {x with action=(match x.action with (* update death time *)
@@ -218,7 +220,12 @@ let update_enemies delta bodies fading enemies =
   let enemies = List.filter (fun x -> match x.action with (* remove long dead bodies *)
                                       | Dead y -> y > 0.0
                                       | _ -> true) enemies in
-  let update_enemy e = let (loc, _) = update_planet_collidable delta bodies e.loc in {e with loc} in
+
+  let update_enemy e =
+    let (loc, _) = if not (on_a_planet e) then
+                     update_planet_collidable delta bodies e.loc
+                   else update_planet_collidable ~no_forces:true delta bodies e.loc in
+    {e with loc} in
   List.map update_enemy enemies
 
 let update_camera cam player =

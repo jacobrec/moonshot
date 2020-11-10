@@ -275,11 +275,11 @@ module World1 = struct
                     vel=vc 0.0 0.0}; action=Standing};
         {Enemy.loc={Body.body={Body.pos=vc (0.4) 0.0; mass=1.0; radius=1.0;};
                     vel=vc 0.0 0.0}; action=Standing};
-        {Enemy.loc={Body.body={Body.pos=vc 29.0 4.0; mass=1.0; radius=1.0;};
+        {Enemy.loc={Body.body={Body.pos=vc 25.0 6.5; mass=1.0; radius=1.0;};
                     vel=vc 0.0 0.0}; action=Standing};
         {Enemy.loc={Body.body={Body.pos=vc 125.0 60.0; mass=1.0; radius=1.0;};
                     vel=vc 0.0 0.0}; action=Standing};
-        {Enemy.loc={Body.body={Body.pos=vc 100.0 18.0; mass=1.0; radius=1.0;};
+        {Enemy.loc={Body.body={Body.pos=vc 100.0 20.0; mass=1.0; radius=1.0;};
                     vel=vc 0.0 0.0}; action=Standing};
       ] in
     make_level 10 "Ten"
@@ -348,7 +348,7 @@ let () = (* Level 2 *)
     ] in
   make_level 102 "Two"
     "Use the gravity of planets to shoot places you couldn't otherwise reach"
-    (-5.0) 0.0 bodies enemies {health=6; time=5.0; shots=1}
+    (-5.0) 0.0 bodies enemies {health=6; time=20.0; shots=3}
 
 
 let () = (* Level rest *)
