@@ -3,6 +3,10 @@ open Moonshot
 let vc = Raylib.Vector2.create
 
 let level_map = Hashtbl.create 12
+let avaliable_worlds = 1
+let world_names = [
+    "Getting Started"
+  ]
 
 let make_level id name start_text px py bodies enemies star_reqs =
   let movables = [] in

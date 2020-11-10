@@ -277,7 +277,7 @@ let draw_levelend model =
   ld (Printf.sprintf "It took you %.2f seconds" model.runtime);
   ld (Printf.sprintf "You took %.1f damage" damage_taken);
   ld (Printf.sprintf "Your longest shot stayed in orbit for %.2f seconds" model.longest_bullet);
-  ld "Press [space] to continue";
+  ld "Press [space] to continue or [r] to retry level";
 
   draw_stars fcolor Color.gold has_health_star has_shot_star has_time_star;
 
@@ -302,19 +302,24 @@ let draw_stats p =
   let ld = line_drawer (ifmul Moonshot.font_size 1.8)
              (Moonshot.screen_width/2) (Moonshot.screen_height/4) f_color in
   ld ~size:(Moonshot.font_size*4) "Stats";
-  ld "Press [space] to return to main menu";
-  ld (Printf.sprintf "Total shots taken: %d" 0);
-  ld (Printf.sprintf "Total time in levels: %.2fs" 0.0);
-  ld (Printf.sprintf "Total damage recieved: %.1f" 0.0);
-  ld (Printf.sprintf "Total stars aquired: %d" 0);
-  ld "Press [0-9,-,=] to select a level for details";
+  if Option.is_none p then
+    ld "Press [space] to return to main menu"
+  else
+    ld "Press [space] to go up a level";
+  let (a, b, c, d) = Savedata.totals () in
+  ld (Printf.sprintf "Total shots taken: %d" a);
+  ld (Printf.sprintf "Total time in levels: %.2fs" b);
+  ld (Printf.sprintf "Total damage recieved: %.1f" c);
+  ld (Printf.sprintf "Total stars aquired: %d" d);
   (match p with
-   | None -> ()
-   | Some p ->
+   | None -> ld "Press [1-9,0] to select a world for details"
+   | Some (p, None) -> ld ("Press [1-9,0,-,=] to select a level in world "
+                           ^ (string_of_int (p / 100)) ^ " details")
+   | Some (w, Some p) ->
       let font = Moonshot.font_size * 2 in
       let y = (cy + height/2) - font / 2 - 5 in
-      draw_centered_text (Printf.sprintf "Selected level %d" p) cx y font f_color;
-      let (h, s, t) = Savedata.level p in
+      draw_centered_text (Printf.sprintf "Selected level %d of world %d" p (w/100)) cx y font f_color;
+      let (h, s, t) = Savedata.level (w - 100 + p) in
       draw_stars f_color Color.gold h s t;
   );
   end_drawing ();
@@ -339,7 +344,16 @@ let draw_worldselect _ =
              (Moonshot.screen_width/2) (Moonshot.screen_height/4) f_color in
   ld ~size:(Moonshot.font_size*4) "World Select";
   ld "Press [space] to return to main menu";
-  ld "Press [0-9] to select a world";
+  ld "Press [1-9,0] to select a world";
+  let lld_y = (Moonshot.screen_height/2) in
+  let ldl = line_drawer (ifmul Moonshot.font_size 2.0)
+             (5*Moonshot.screen_width/16) lld_y f_color in
+  let keys = ["1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "0"; "-"; "="] in
+  List.iter (fun level ->
+      ldl ~centered:false (Printf.sprintf "[%s] World %d: %s" (List.nth keys (level-1)) level
+                         (List.nth Level.world_names (level - 1))
+        );
+    ) (List.init 1 (fun i -> i+1));
   end_drawing ();
   Model.WorldSelect
 
@@ -362,7 +376,7 @@ let draw_levelselect w =
              (Moonshot.screen_width/2) (Moonshot.screen_height/4) f_color in
   ld ~size:(Moonshot.font_size*4) ("World "^(string_of_int (w/100))^" Level Select");
   ld "Press [space] to return to world select";
-  ld "Press [0-9,-,=] to select a level";
+  ld "Press [1-9,0,-,=] to select a level";
   let lld_y = (Moonshot.screen_height/2) in
   let ldl = line_drawer (ifmul Moonshot.font_size 2.0)
              (5*Moonshot.screen_width/16) lld_y f_color in

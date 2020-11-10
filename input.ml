@@ -81,12 +81,23 @@ let input_stats p =
       (Key.Equal, 12);(* Level 12 *)
     ] in
   match List.find_opt (fun (a, _) -> is_key_pressed a) keymap with
-  | None when is_key_pressed Key.Space -> Model.MenuScreen
+  | None when is_key_pressed Key.Space ->
+     (match p with
+      | None -> Model.MenuScreen
+      | Some (_, None) -> Model.StatsScreen None
+      | Some (w, Some _) -> Model.StatsScreen (Some (w, None)))
   | None -> Model.StatsScreen p
-  | Some (_, b) -> Model.StatsScreen (Some b)
+  | Some (_, b) ->
+     (match p with
+      | None -> Model.StatsScreen (Some (b * 100, None))
+      | Some (w, None) -> Model.StatsScreen (Some (w, Some b))
+      | Some (w, Some l) -> Model.StatsScreen (Some (w, Some l)))
 
 let input_levelend p =
-  if is_key_pressed Key.Space then Model.MenuScreen
+  let open Model in
+  ignore p.reason;
+  if is_key_pressed Key.Space then Model.LevelSelect ((p.id / 100 + 1) * 100)
+  else if is_key_pressed Key.R then Model.Playing (Level.load p.id)
   else Model.LevelEnd p
 
 let input_level p =
@@ -127,7 +138,9 @@ let input_world _ =
   match List.find_opt (fun (a, _) -> is_key_pressed a) keymap with
   | None when is_key_pressed Key.Space -> Model.MenuScreen
   | None -> Model.WorldSelect
-  | Some (_, b) -> Model.LevelSelect (b * 100)
+  | Some (_, b) -> if b <= Level.avaliable_worlds then
+                     Model.LevelSelect (b * 100)
+                   else Model.WorldSelect
 
 let input model =
   match model with

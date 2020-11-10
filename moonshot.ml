@@ -103,7 +103,7 @@ module Model = struct
     | WorldSelect
     | LevelSelect of int
     | MenuScreen
-    | StatsScreen of int Option.t
+    | StatsScreen of (int * int Option.t) Option.t
 end
 
 let ssize = 55
