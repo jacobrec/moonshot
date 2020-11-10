@@ -244,18 +244,39 @@ let draw_levelend model =
   let has_time_star = model.star_reqs.time >= model.runtime in
   let has_shot_star = model.star_reqs.shots >= model.shots_taken in
   let has_health_star = model.star_reqs.health <= model.health in
-  let make_star h b = h ^ ": " ^ (if b then "*" else "-") in
-  let time_star = make_star "Time" has_time_star in
-  let shot_star = make_star "Shots" has_shot_star in
-  let health_star = make_star "Health" has_health_star in
-  let msg = Printf.sprintf "Level %s\n%s\nYou took %d shots\nIt took you %.2f seconds\nYou took %.1f damage\nYour longest shot stayed in orbit for %.2f seconds\n***Stars***\n%s\n%s\n%s\n\nPress space to continue"
-              model.name msg model.shots_taken model.runtime
-              (float_of_int (6-model.health) /. 2.0) model.longest_bullet
-              health_star time_star shot_star in
-  let width = (3*Moonshot.screen_width/4) in
+
+  let damage_taken =(float_of_int (6-model.health) /. 2.0) in
+
+  let width = 3 * Moonshot.screen_width / 4 in
+  let height = 3 * Moonshot.screen_height / 4 in
   let cx = Moonshot.screen_width / 2 in
   let cy = Moonshot.screen_height / 2 in
-  draw_text_box ~centered:true (Moonshot.font_size * 2) cx cy width fcolor bcolor msg;
+  let ld = line_drawer (Moonshot.font_size*2)
+             cx (Moonshot.screen_height/4) fcolor in
+  draw_rectangle (cx - width / 2) (cy - height / 2) width height bcolor;
+  ld ~size:(Moonshot.font_size*4) ("Level " ^ model.name ^ ": " ^ msg);
+  ld (Printf.sprintf "You took %d shots" model.shots_taken);
+  ld (Printf.sprintf "It took you %.2f seconds" model.runtime);
+  ld (Printf.sprintf "You took %.1f damage" damage_taken);
+  ld (Printf.sprintf "Your longest shot stayed in orbit for %.2f seconds" model.longest_bullet);
+  ld "Press [space] to continue";
+
+  let ty = (6 * Moonshot.screen_height / 8) in
+  let x1 = (cx-cx/2) in
+  let x2 = cx in
+  let x3 = (cx+cx/2) in
+  draw_centered_text "Health" x1 ty (Moonshot.font_size*3) fcolor;
+  draw_centered_text "Shots" x2 ty (Moonshot.font_size*3) fcolor;
+  draw_centered_text "Time" x3 ty (Moonshot.font_size*3) fcolor;
+  let draw_star x =
+    let r = Moonshot.ssize / 2 in
+    let y = ty - (2*r) in
+    draw_circle x y (float_of_int r) Color.gold in
+
+  if has_health_star then draw_star x1;
+  if has_shot_star then draw_star x2;
+  if has_time_star then draw_star x3;
+
   end_drawing ();
   Model.LevelEnd model
 
