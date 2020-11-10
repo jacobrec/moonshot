@@ -68,7 +68,7 @@ let draw_enemy e =
 
 let draw_planet p =
   let open Body in
-  let pain = p.is_painful in
+  let surface = p.surface in
   let p = p.body in
   let density = p.mass /. (p.radius *. p.radius) in
   let color =
@@ -82,8 +82,10 @@ let draw_planet p =
   let r = p.radius in
   let (px, py) = sofwv p.pos in
   let pr = float_of_int @@ sofw r in
-  if pain then draw_circle_gradient px py pr color Color.red
-  else draw_circle px py pr color
+  match surface with
+  | Body.Painful -> draw_circle_gradient px py pr color Color.red
+  | Body.Sticky  -> draw_circle_gradient px py pr color Color.pink
+  | Body.Normal  -> draw_circle px py pr color
 
 let measure_text_wh text size =
   let f = get_font_default () in
@@ -132,7 +134,7 @@ let draw_playing_starfield stars px py =
 
 let draw_playing model =
   let { Moonshot.Model.bullets=movables; static; fading;
-        player={feet=pfeet; head=phead; input=inp; health}; enemies; cam; runtime; _} = model in
+        player={feet=pfeet; head=phead; input=inp; health; _}; enemies; cam; runtime; _} = model in
   let player = model.player in
   begin_drawing ();
   clear_background Color.black;
@@ -148,7 +150,7 @@ let draw_playing model =
   List.iter draw_enemy enemies;
   (match inp with
    | Moonshot.Player.Aiming (ax, ay) ->
-      let bodies = List.map (fun x -> let open Body in ignore (x.is_painful); x.body) static in
+      let bodies = List.map (fun x -> let open Body in ignore (x.surface); x.body) static in
       draw_aim_assist bodies 5 0.15 ax ay player;
       let (px, py) = vector phead.body.pos in
       let (ax, ay) = Update.truncate_aim ax ay px py in
@@ -259,9 +261,9 @@ let draw_levelend model =
     | Victory -> "Victory!!"
     | DriftedAway -> "Lost in space :("
     | Died -> "You Died :(" in
-  let has_time_star = model.star_reqs.time >= model.runtime in
-  let has_shot_star = model.star_reqs.shots >= model.shots_taken in
-  let has_health_star = model.star_reqs.health <= model.health in
+  let has_time_star = (model.reason=Victory) && model.star_reqs.time >= model.runtime in
+  let has_shot_star = (model.reason=Victory) && model.star_reqs.shots >= model.shots_taken in
+  let has_health_star = (model.reason=Victory) && model.star_reqs.health <= model.health in
 
   let damage_taken =(float_of_int (6-model.health) /. 2.0) in
 
@@ -353,7 +355,7 @@ let draw_worldselect _ =
       ldl ~centered:false (Printf.sprintf "[%s] World %d: %s" (List.nth keys (level-1)) level
                          (List.nth Level.world_names (level - 1))
         );
-    ) (List.init 1 (fun i -> i+1));
+    ) (List.init Level.avaliable_worlds (fun i -> i+1));
   end_drawing ();
   Model.WorldSelect
 

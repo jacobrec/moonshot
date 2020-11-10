@@ -1,6 +1,11 @@
 open Raylib
 
 module Body = struct
+  type surface_type =
+    | Normal
+    | Painful
+    | Sticky
+
   type t = {
       pos: Vector2.t; (* in meters *)
       mass: float; (* in kg *)
@@ -12,7 +17,7 @@ module Body = struct
     }
   type planet = {
       body: t;
-      is_painful: bool;
+      surface: surface_type;
     }
   type moving = {
       vel: Vector2.t; (* in m/s *)
@@ -22,6 +27,7 @@ module Body = struct
       created_at : float;
       moving : moving;
     }
+
 end
 
 module Player = struct
@@ -38,6 +44,7 @@ module Player = struct
       feet : Body.moving;
       input: input_type;
       health : int;
+      last_damaged_at : float;
     }
 end
 
@@ -142,7 +149,8 @@ let wofs = world_of_screen
 let sofwv = screen_of_world_vector
 let wofsv = world_of_screen_vector
 
-let explosion_time = 0.6
+let damage_cooldown = 0.51
+let explosion_time = 0.5
 let explosion_mass = -100.0
 let explosion_radius = 3.0
 

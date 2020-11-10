@@ -132,20 +132,26 @@ let update_planet_collidable ?(inp=None) delta bodies base =
   (b'', (b_fx, b_fy))
 
 let update_player delta bodies static fading player =
-  let {Moonshot.Player.head=float; feet=base; input; health} = player in
+  let {Moonshot.Player.head=float; feet=base; input; health; last_damaged_at} = player in
   (* player is like a balloon attached to a rock at a fixed distance *)
   let open Moonshot.Body in
 
-  let ouchies = List.filter (fun x -> x.is_painful) static in
-  let touching_ouchy_planets = List.exists (fun b2 -> ignore (b2.is_painful); bodies_touch base.body b2.body) ouchies in
+  let ouchies = List.filter (fun x -> x.surface = Painful) static in
+  let touching_ouchy_planets = List.exists (fun b2 -> ignore (b2.surface); bodies_touch base.body b2.body) ouchies in
+  let stickies = List.filter (fun x -> x.surface = Sticky) static in
+  let touching_sticky_planets = List.exists (fun b2 -> ignore (b2.surface); bodies_touch base.body b2.body) stickies in
   let in_any_explosion = List.exists (fun b2 -> ignore(b2.remaining);
                                                    bodies_touch base.body b2.body) fading in
-  let health = if in_any_explosion || touching_ouchy_planets then health - 1 else health in
-  let input = if in_any_explosion || touching_ouchy_planets then Player.Jump else input in
+  let damaged = (in_any_explosion || touching_ouchy_planets) &&
+                  (last_damaged_at +. Moonshot.damage_cooldown < get_time ()) in
+  let health = if damaged then health - 1 else health in
+  let input = if damaged then Player.Jump else input in
+  let last_damaged_at = if damaged then get_time () else last_damaged_at in
 
   (* Calculate new base *)
   let (new_b, (b_fx, b_fy)) = update_planet_collidable ~inp:(Some input) delta bodies base in
   let new_f = float in
+  let new_b = if not touching_sticky_planets then new_b else base in
 
   (* Calculate new float *)
   let gravity_dir = -.Float.pi /.2.0  -. Float.atan2 b_fx b_fy in
@@ -153,7 +159,7 @@ let update_player delta bodies static fading player =
   Vector2.set_x new_f.body.pos ((Vector2.x new_b.body.pos) +. seperation *. Float.cos gravity_dir);
   Vector2.set_y new_f.body.pos ((Vector2.y new_b.body.pos) +. seperation *. Float.sin gravity_dir);
 
-  {player with Moonshot.Player.head=new_f; feet=new_b; health}
+  {player with Moonshot.Player.head=new_f; feet=new_b; health; last_damaged_at}
 
 let truncate_aim ax ay px py =
   let aim_length = 10.0 in
@@ -243,7 +249,7 @@ let update_playing_check_for_level_end model =
       ((fun _ -> let (x, y) = vector model.player.feet.body.pos in
                  (x *. x +. y *. y) > 100.0 *. 100.0 &&
                    not (List.exists (fun p -> let open Body in
-                                              ignore (p.is_painful);
+                                              ignore (p.surface);
                                               let (px, py) = vector p.body.pos in
                                               let dx, dy = (px -. x), (py -. y) in
                                               100.0 *. 100.0 > (dx *. dx +. dy *. dy)
@@ -270,7 +276,7 @@ let update_playing delta model =
         enemies; cam; runtime; shots_taken; longest_bullet; _ } = model in
   let enemy_body x = let open Enemy in x.loc.body in
   let explosion_body x = ignore (x.remaining); x.body in
-  let planet_body x = ignore (x.is_painful); x.body in
+  let planet_body x = ignore (x.surface); x.body in
   let bullet_body x = ignore (x.created_at); x.moving.body in
   let body_set ?(bullets=[]) ?(static=[]) ?(fading=[]) ?(enemies=[]) _ =
     List.concat [List.map explosion_body fading;

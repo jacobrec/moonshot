@@ -53,7 +53,7 @@ let input_paused model =
   let quit = is_key_pressed Key.Q in
   let restart = is_key_pressed Key.R in
   let open Model in
-  if quit then MenuScreen
+  if quit then Model.LevelSelect ((model.id / 100 + 1) * 100)
   else if restart then Playing (Level.load model.id)
   else if unpaused then Playing model
   else Paused model
