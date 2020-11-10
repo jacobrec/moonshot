@@ -89,7 +89,8 @@ let input_stats p =
   | None -> Model.StatsScreen p
   | Some (_, b) ->
      (match p with
-      | None -> Model.StatsScreen (Some (b * 100, None))
+      | None when b <= Level.avaliable_worlds -> Model.StatsScreen (Some (b * 100, None))
+      | None -> Model.StatsScreen p
       | Some (w, None) -> Model.StatsScreen (Some (w, Some b))
       | Some (w, Some l) -> Model.StatsScreen (Some (w, Some l)))
 
@@ -138,9 +139,8 @@ let input_world _ =
   match List.find_opt (fun (a, _) -> is_key_pressed a) keymap with
   | None when is_key_pressed Key.Space -> Model.MenuScreen
   | None -> Model.WorldSelect
-  | Some (_, b) -> if b <= Level.avaliable_worlds then
-                     Model.LevelSelect (b * 100)
-                   else Model.WorldSelect
+  | Some (_, b) when b <= Level.avaliable_worlds -> Model.LevelSelect (b * 100)
+  | Some (_, _) -> Model.WorldSelect
 
 let input model =
   match model with
