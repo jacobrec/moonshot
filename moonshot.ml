@@ -63,6 +63,22 @@ module Model = struct
       health : int;
     }
 
+
+  type endreason =
+    | Victory
+    | Died
+    | DriftedAway
+
+  type endstats = {
+      id : int;
+      health  : int;
+      runtime : float;
+      shots_taken : int;
+      longest_bullet : float;
+      reason  : endreason;
+      name : string;
+      star_reqs : star_requirements;
+    }
   type playing = {
       start_text : string;
       name : string;
@@ -80,26 +96,12 @@ module Model = struct
       star_reqs : star_requirements;
     }
 
-  type endreason =
-    | Victory
-    | Died
-    | DriftedAway
-
-  type endstats = {
-      health  : int;
-      runtime : float;
-      shots_taken : int;
-      longest_bullet : float;
-      reason  : endreason;
-      name : string;
-      star_reqs : star_requirements;
-    }
-
   type t =
     | Playing of playing
     | Paused of playing
     | LevelEnd of endstats
     | MenuScreen
+    | StatsScreen of int Option.t
 end
 
 let ssize = 55

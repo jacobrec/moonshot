@@ -72,8 +72,8 @@ let draw_planet p =
   let p = p.body in
   let density = p.mass /. (p.radius *. p.radius) in
   let color =
-    if density > 30.0 then Color.black
-    else if density > 25.0 then Color.black
+    if density > 30.0 then Color.create 40 10 75 255
+    else if density > 25.0 then Color.darkgray
     else if density > 20.0 then Color.brown
     else if density > 15.0 then Color.gray
     else if density > 10.0 then Color.gold
@@ -223,11 +223,29 @@ let draw_menuscreen _ =
   draw_centered_text "Press [0-9,-,=] to select a level"
     (Moonshot.screen_width / 2) (3 * Moonshot.screen_height / 4)
     little_font_size f_color;
-  draw_centered_text "Press [space] to view stats"
+  draw_centered_text "Press [s] to view stats"
     (Moonshot.screen_width / 2) (3 * Moonshot.screen_height / 4 + little_font_size)
     little_font_size f_color;
   end_drawing ();
   Model.MenuScreen
+
+let draw_stars fcolor scolor has_health_star has_shot_star has_time_star =
+  let ty = (6 * Moonshot.screen_height / 8) in
+  let cx = Moonshot.screen_width / 2 in
+  let x1 = (cx-cx/2) in
+  let x2 = cx in
+  let x3 = (cx+cx/2) in
+  draw_centered_text "Health" x1 ty (Moonshot.font_size*3) fcolor;
+  draw_centered_text "Shots" x2 ty (Moonshot.font_size*3) fcolor;
+  draw_centered_text "Time" x3 ty (Moonshot.font_size*3) fcolor;
+  let draw_star x =
+    let r = Moonshot.ssize / 2 in
+    let y = ty - (2*r) in
+    draw_circle x y (float_of_int r) scolor in
+
+  if has_health_star then draw_star x1;
+  if has_shot_star then draw_star x2;
+  if has_time_star then draw_star x3
 
 let draw_levelend model =
   let open Moonshot.Model in
@@ -261,28 +279,51 @@ let draw_levelend model =
   ld (Printf.sprintf "Your longest shot stayed in orbit for %.2f seconds" model.longest_bullet);
   ld "Press [space] to continue";
 
-  let ty = (6 * Moonshot.screen_height / 8) in
-  let x1 = (cx-cx/2) in
-  let x2 = cx in
-  let x3 = (cx+cx/2) in
-  draw_centered_text "Health" x1 ty (Moonshot.font_size*3) fcolor;
-  draw_centered_text "Shots" x2 ty (Moonshot.font_size*3) fcolor;
-  draw_centered_text "Time" x3 ty (Moonshot.font_size*3) fcolor;
-  let draw_star x =
-    let r = Moonshot.ssize / 2 in
-    let y = ty - (2*r) in
-    draw_circle x y (float_of_int r) Color.gold in
-
-  if has_health_star then draw_star x1;
-  if has_shot_star then draw_star x2;
-  if has_time_star then draw_star x3;
+  draw_stars fcolor Color.gold has_health_star has_shot_star has_time_star;
 
   end_drawing ();
   Model.LevelEnd model
+
+let draw_stats p =
+  let f_color = Color.raywhite in
+  let b_color = Color.black in
+  begin_drawing ();
+  clear_background b_color;
+  draw_menu_starfield ();
+
+  let bcolor = Color.create 49 49 49 200 in
+  let width = 3 * Moonshot.screen_width / 4 in
+  let height = 3 * Moonshot.screen_height / 4 in
+  let cx = Moonshot.screen_width / 2 in
+  let cy = Moonshot.screen_height / 2 in
+  draw_rectangle (cx - width / 2) (cy - height / 2) width height bcolor;
+
+  let ifmul a b = int_of_float ((float_of_int a) *. b) in
+  let ld = line_drawer (ifmul Moonshot.font_size 1.8)
+             (Moonshot.screen_width/2) (Moonshot.screen_height/4) f_color in
+  ld ~size:(Moonshot.font_size*4) "Stats";
+  ld "Press [space] to return to main menu";
+  ld (Printf.sprintf "Total shots taken: %d" 0);
+  ld (Printf.sprintf "Total time in levels: %.2fs" 0.0);
+  ld (Printf.sprintf "Total damage recieved: %.1f" 0.0);
+  ld (Printf.sprintf "Total stars aquired: %d" 0);
+  ld "Press [0-9,-,=] to select a level for details";
+  (match p with
+   | None -> ()
+   | Some p ->
+      let font = Moonshot.font_size * 2 in
+      let y = (cy + height/2) - font / 2 - 5 in
+      draw_centered_text (Printf.sprintf "Selected level %d" p) cx y font f_color;
+      let (h, s, t) = Savedata.level p in
+      draw_stars f_color Color.gold h s t;
+  );
+  end_drawing ();
+  Model.StatsScreen p
 
 let draw model =
   match model with
   | Model.Paused p -> draw_paused p
   | Model.Playing p -> draw_playing p
   | Model.MenuScreen -> draw_menuscreen ()
+  | Model.StatsScreen p -> draw_stats p
   | Model.LevelEnd p -> draw_levelend p

@@ -75,8 +75,29 @@ let input_menu _ =
     ] in
   (* TODO: Graphical selector with buttons *)
   match List.find_opt (fun (a, _) -> is_key_down a) keymap with
+  | None when is_key_pressed Key.S -> Model.StatsScreen None
   | None -> Model.MenuScreen
   | Some (_, b) -> Model.Playing (Level.load b)
+
+let input_stats p =
+  let keymap = [
+      (Key.One,   1);
+      (Key.Two,   2);
+      (Key.Three, 3);
+      (Key.Four,  4);
+      (Key.Five,  5);
+      (Key.Six,   6);
+      (Key.Seven, 7);
+      (Key.Eight, 8);
+      (Key.Nine,  9);
+      (Key.Zero,  10); (* Level 10 *)
+      (Key.Minus, 11);(* Level 11 *)
+      (Key.Equal, 12);(* Level 12 *)
+    ] in
+  match List.find_opt (fun (a, _) -> is_key_down a) keymap with
+  | None when is_key_pressed Key.Space -> Model.MenuScreen
+  | None -> Model.StatsScreen p
+  | Some (_, b) -> Model.StatsScreen (Some b)
 
 let input_levelend p =
   if is_key_pressed Key.Space then Model.MenuScreen
@@ -87,4 +108,5 @@ let input model =
   | Model.Paused p -> input_paused p
   | Model.Playing p -> input_playing p
   | Model.MenuScreen -> input_menu ()
+  | Model.StatsScreen p -> input_stats p
   | Model.LevelEnd p -> input_levelend p

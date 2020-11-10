@@ -251,13 +251,17 @@ let update_playing_check_for_level_end model =
       ((fun _ -> 0 = List.length model.enemies), Model.Victory);
     ] in
   match List.find_opt (fun (a, _) -> a ()) end_conditions with
-  | Some (_, reason) ->Model.LevelEnd {Model.reason=reason;
-                        name=model.name;
-                        runtime=model.runtime;
-                        longest_bullet;
-                        shots_taken=model.shots_taken;
-                        star_reqs=model.star_reqs;
-                        health=model.player.health}
+  | Some (_, reason) ->
+     let le = {Model.reason=reason;
+               id=model.id;
+               name=model.name;
+               runtime=model.runtime;
+               longest_bullet;
+               shots_taken=model.shots_taken;
+               star_reqs=model.star_reqs;
+               health=model.player.health} in
+     if reason = Victory then Savedata.save le;
+     Model.LevelEnd le
   | None -> Model.Playing model
 
 let update_playing delta model =
@@ -305,5 +309,6 @@ let update delta model =
   | Model.Paused p -> Model.Paused p
   | Model.Playing p -> update_playing delta p
   | Model.MenuScreen -> Model.MenuScreen
+  | Model.StatsScreen p -> Model.StatsScreen p
   | Model.LevelEnd p -> Model.LevelEnd p
 
