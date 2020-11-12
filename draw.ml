@@ -59,15 +59,40 @@ let draw_aim_assist bodies dots freq ax ay player =
   let every_few = filteri (fun i _ -> i mod (int_of_float (freq /. timing) + 1) = 0) all in
   List.iter (fun x -> let open Moonshot.Body in draw_body Color.darkgray x.body) every_few
 
+let draw_texture text wloc ang size =
+  let psize = sofw size in
+  let tsize = Texture2D.width text in
+  let sf = (float_of_int psize) /. (float_of_int tsize) in
+  let p = sofwv_v wloc in
+  let p_ang = 270.0 -. ang *. 180.0 /. Float.pi in
+  let px, py = vector p in
+  let p_off = (float_of_int tsize *. sf) /. 2.0 in
+  let p = Vector2.create (px -. (p_off *. Float.cos ang) +. p_off *. Float.sin ang)
+            (py +. (p_off *. Float.sin ang) +. p_off *. Float.cos ang) in
+
+  draw_texture_ex text p p_ang sf Color.white
+
 let draw_enemy e =
   let open Moonshot.Enemy in
   let c = match e.action with
     | Dead _ -> Color.darkblue
     | _ -> Color.blue in
 
-  let p = sofwv_v e.loc.body.pos in
-  draw_texture_ex (Images.get_animation Images.EnemyStanding) p 0.0 0.5 Color.white;
-  draw_body c e.loc.body
+  let size = 2.0 in
+  draw_texture (Images.get_animation Images.EnemyStanding) e.loc.body.pos e.angle size;
+  if Moonshot.debug_draw then
+    draw_body c e.loc.body
+
+let draw_player pfeet phead =
+  let open Moonshot.Body in
+  let (pxh, pyh) = vector phead.body.pos in
+  let (pxf, pyf) = vector pfeet.body.pos in
+  let p_angr = Float.atan2 (pyf -. pyh) (pxf -. pxh) in
+  let size = 3.5 in
+  draw_texture (Images.get Images.PlayerStanding) phead.body.pos p_angr size;
+  if Moonshot.debug_draw then
+    List.iter (draw_body Color.lime) @@ List.map (fun x -> x.body) [phead; pfeet]
+
 
 let draw_planet p =
   let open Body in
@@ -149,20 +174,7 @@ let draw_playing model =
   List.iter (fun x -> let open Moonshot.Body in draw_body Color.gray x.moving.body) movables;
   List.iter draw_explosion fading;
   (* Draw Player*)
-  List.iter (draw_body Color.lime) @@
-    List.map (fun x -> let open Moonshot.Body in x.body) [phead; pfeet];
-  let p = sofwv_v pfeet.body.pos in
-  let (pxh, pyh) = vector phead.body.pos in
-  let (pxf, pyf) = vector pfeet.body.pos in
-  let p_ang = Float.atan2 (pyh -. pyf) (pxh -. pxf) in
-  let p_ang = 90.0 -. p_ang *. 180.0 /. Float.pi in
-  Printf.printf "Ang: %f\n%!" p_ang;
-  let px, py = vector p in
-  let px_off = 10.0 in
-  let py_off = -10.0 in
-  let p = Vector2.create (px +. px_off) (py +. py_off) in
-
-  draw_texture_ex (Images.get Images.PlayerStanding) p p_ang 0.3 Color.white;
+  draw_player pfeet phead;
 
   (* Draw Enemies*)
   List.iter draw_enemy enemies;

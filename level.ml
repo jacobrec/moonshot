@@ -51,6 +51,10 @@ let world_names = [
     "Strange new worlds"
   ]
 
+let make_slime x y =
+  {Enemy.loc={Body.body={Body.pos=vc x y; mass=1.0; radius=1.0;};
+              vel=vc 0.0 0.0}; action=Standing; angle=0.0}
+
 let make_level id name start_text px py bodies enemies star_reqs =
   let movables = [] in
   let cam = Raylib.Camera2D.create (vc (float_of_int (screen_width / 2)) (float_of_int (screen_height / 2)))
@@ -102,10 +106,7 @@ module World1 = struct
         {Body.surface=Body.Normal;
          body={Body.pos=vc 30.0 0.0; mass=1500.0; radius=15.0;}};
       ] in
-    let enemies = [
-        {Enemy.loc={Body.body={Body.pos=vc 15.0 0.0; mass=1.0; radius=1.0;};
-                    vel=vc 0.0 0.0}; action=Standing}
-      ] in
+    let enemies = [make_slime 15.0 0.0] in
     make_level 1 "One"
       "Click and drag away from your player to aim like a slingshot. Release to fire."
       (-15.0) 0.0 bodies enemies {health=6; time=5.0; shots=1}
@@ -115,10 +116,7 @@ module World1 = struct
         {Body.surface=Body.Normal;
          body={Body.pos=vc 0.0 0.0; mass=1800.0; radius=15.0;}};
       ] in
-    let enemies = [
-        {Enemy.loc={Body.body={Body.pos=vc 15.0 0.0; mass=1.0; radius=1.0;};
-                    vel=vc 0.0 0.0}; action=Standing}
-      ] in
+    let enemies = [make_slime 15.0 0.0] in
     make_level 2 "Two"
       "Use A and S to move clockwise, and counter clockwise around the planet you're on"
       (-15.0) 0.0 bodies enemies {health=6; time=5.0; shots=1}
@@ -130,10 +128,7 @@ module World1 = struct
         {Body.surface=Body.Normal; body={Body.pos=vc (-60.0) (-60.0); mass=1000.0; radius=15.0;}};
         {Body.surface=Body.Normal; body={Body.pos=vc (-90.0) (-90.0); mass=100.0; radius=6.0;}};
       ] in
-    let enemies = [
-        {Enemy.loc={Body.body={Body.pos=vc (-85.0) (-85.0); mass=1.0; radius=1.0;};
-                    vel=vc 0.0 0.0}; action=Standing}
-      ] in
+    let enemies = [make_slime (-85.0) (-85.0)] in
     make_level 3 "Three"
       "Press space to jump"
       (-15.0) 0.0 bodies enemies {health=6; time=10.0; shots=1}
@@ -148,10 +143,7 @@ module World1 = struct
         {Body.surface=Body.Normal; body={Body.pos=vc  115.0   95.0; mass=2600.0; radius=10.0;}};
         {Body.surface=Body.Normal; body={Body.pos=vc  135.0  115.0; mass=400.0;  radius=5.0;}};
       ] in
-    let enemies = [
-        {Enemy.loc={Body.body={Body.pos=vc (130.0) (110.0); mass=1.0; radius=1.0;};
-                    vel=vc 0.0 0.0}; action=Standing}
-      ] in
+    let enemies = [make_slime (130.0) (110.0)] in
     make_level 4 "Four"
       "Different planets have different densities. More mass means more gravity."
       (-15.0) 0.0 bodies enemies {health=6; time=15.0; shots=1}
@@ -170,10 +162,7 @@ module World1 = struct
         {Body.surface=Body.Normal; body={Body.pos=vc  (-80.0) 5.0;  mass=300.0; radius=4.0;}};
         {Body.surface=Body.Normal; body={Body.pos=vc  (-100.0) 5.0; mass=600.0; radius=3.0;}};
       ] in
-    let enemies = [
-        {Enemy.loc={Body.body={Body.pos=vc (-103.0) (2.0); mass=1.0; radius=1.0;};
-                    vel=vc 0.0 0.0}; action=Standing}
-      ] in
+    let enemies = [make_slime (-103.0) (2.0)] in
     make_level 5 "Five"
       "Jump just as you land to double (or triple) jump and go even higher."
       15.0 0.0 bodies enemies {health=6; time=10.0; shots=1}
@@ -194,10 +183,7 @@ module World1 = struct
 
         {Body.surface=Body.Normal; body={Body.pos=vc  (-100.0) 5.0; mass=600.0;  radius=3.0;}};
       ] in
-    let enemies = [
-        {Enemy.loc={Body.body={Body.pos=vc (-103.0) (2.0); mass=1.0; radius=1.0;};
-                    vel=vc 0.0 0.0}; action=Standing}
-      ] in
+    let enemies = [make_slime (-103.0) (2.0)] in
     make_level 6 "Six"
       "Some planets are painful to touch"
       14.0 2.0 bodies enemies {health=6; time=13.0; shots=1}
@@ -207,10 +193,7 @@ module World1 = struct
         {Body.surface=Body.Normal; body={Body.pos=vc 0.0 0.0; mass=600.0;  radius=6.0;}};
         {Body.surface=Body.Normal; body={Body.pos=vc 18.0 0.0; mass=600.0;  radius=6.0;}};
       ] in
-    let enemies = [
-        {Enemy.loc={Body.body={Body.pos=vc (12.0) (0.0); mass=1.0; radius=1.0;};
-                    vel=vc 0.0 0.0}; action=Standing}
-      ] in
+    let enemies = [make_slime (12.0) (0.0)] in
     make_level 7 "Seven"
       "Careful, if you are not, you may get caught by your own shot."
       6.0 0.0 bodies enemies {health=6; time=3.0; shots=1}
@@ -222,10 +205,7 @@ module World1 = struct
         {Body.surface=Body.Normal; body={Body.pos=vc 50.0 0.0; mass=100.0;  radius=2.0;}};
         {Body.surface=Body.Normal; body={Body.pos=vc 20.0 (-10.0); mass=100.0;  radius=10.0;}};
       ] in
-    let enemies = [
-        {Enemy.loc={Body.body={Body.pos=vc (50.0) (-2.0); mass=1.0; radius=1.0;};
-                    vel=vc 0.0 0.0}; action=Standing}
-      ] in
+    let enemies = [make_slime (50.0) (-2.0)] in
     make_level 8 "Eight"
       "Some celetial bodies are extremely dense. You can restart the level through the pause menu (press p)"
       6.0 0.0 bodies enemies {health=6; time=8.0; shots=1}
@@ -242,14 +222,10 @@ module World1 = struct
         {Body.surface=Body.Normal; body={Body.pos=vc 110.0 30.0; mass=500.0; radius=1.0;}};
       ] in
     let enemies = [
-        {Enemy.loc={Body.body={Body.pos=vc 40.0 11.0; mass=1.0; radius=1.0;};
-                    vel=vc 0.0 0.0}; action=Standing};
-        {Enemy.loc={Body.body={Body.pos=vc 70.0 (-18.0); mass=1.0; radius=1.0;};
-                    vel=vc 0.0 0.0}; action=Standing};
-        {Enemy.loc={Body.body={Body.pos=vc 110.0 32.0; mass=1.0; radius=1.0;};
-                    vel=vc 0.0 0.0}; action=Standing};
-        {Enemy.loc={Body.body={Body.pos=vc 110.0 28.0; mass=1.0; radius=1.0;};
-                    vel=vc 0.0 0.0}; action=Standing};
+        make_slime 40.0 11.0;
+        make_slime 70.0 (-18.0);
+        make_slime 110.0 32.0;
+        make_slime 110.0 28.0;
       ] in
     make_level 9 "Nine"
       "You've learned all there is. Good luck. See if you can 3 star all the levels"
@@ -271,16 +247,11 @@ module World1 = struct
         {Body.surface=Body.Normal; body={Body.pos=vc (125.0) ( 55.0); mass=200.0; radius=4.0;}};
       ] in
     let enemies = [
-        {Enemy.loc={Body.body={Body.pos=vc (-58.0) 0.0; mass=1.0; radius=1.0;};
-                    vel=vc 0.0 0.0}; action=Standing};
-        {Enemy.loc={Body.body={Body.pos=vc (0.4) 0.0; mass=1.0; radius=1.0;};
-                    vel=vc 0.0 0.0}; action=Standing};
-        {Enemy.loc={Body.body={Body.pos=vc 25.0 6.5; mass=1.0; radius=1.0;};
-                    vel=vc 0.0 0.0}; action=Standing};
-        {Enemy.loc={Body.body={Body.pos=vc 125.0 60.0; mass=1.0; radius=1.0;};
-                    vel=vc 0.0 0.0}; action=Standing};
-        {Enemy.loc={Body.body={Body.pos=vc 100.0 20.0; mass=1.0; radius=1.0;};
-                    vel=vc 0.0 0.0}; action=Standing};
+        make_slime (-58.0) 0.0;
+        make_slime (0.4) 0.0;
+        make_slime 25.0 6.5;
+        make_slime 125.0 60.0;
+        make_slime 100.0 20.0;
       ] in
     make_level 10 "Ten"
       "Another level to test your skills"
@@ -293,10 +264,7 @@ module World1 = struct
         {Body.surface=Body.Normal;
          body={Body.pos=vc 30.0 0.0; mass=300.0; radius=5.0;}};
       ] in
-    let enemies = [
-        {Enemy.loc={Body.body={Body.pos=vc 30.0 (-6.0); mass=1.0; radius=1.0;};
-                    vel=vc 0.0 0.0}; action=Standing}
-      ] in
+    let enemies = [make_slime 30.0 (-6.0)] in
     make_level 11 "Eleven"
       "Think fast!"
       (-30.0) 0.0 bodies enemies {health=5; time=3.0; shots=1}
@@ -305,9 +273,7 @@ module World1 = struct
     let x r theta = r *. Float.cos theta in
     let y r theta = r *. Float.sin theta in
     let circle_angles count = List.init count (fun i -> (float_of_int i) *. Float.pi *. 2.0 /. (float_of_int count)) in
-    let angle_to_enemy r theta =
-      {Enemy.loc={Body.body={Body.pos=vc (x r theta) (y r theta); mass=1.0; radius=1.0;};
-                  vel=vc 0.0 0.0}; action=Standing} in
+    let angle_to_enemy r theta = make_slime (x r theta) (y r theta) in
 
     let r1 = List.map (angle_to_enemy 5.0) (circle_angles 3) in
     let bodies = [] in
@@ -319,17 +285,11 @@ module World1 = struct
 end
 
 module World2 = struct
-  let make_slime x y =
-    {Enemy.loc={Body.body={Body.pos=vc x y; mass=1.0; radius=1.0;};
-                vel=vc 0.0 0.0}; action=Standing}
 let () = (* Level 1 *)
   let bodies = [
       {Body.surface=Body.Sticky; body={Body.pos=vc 0.0 0.0; mass=300.0; radius=5.0;}};
     ] in
-  let enemies = [
-      {Enemy.loc={Body.body={Body.pos=vc 5.0 0.0; mass=1.0; radius=1.0;};
-                  vel=vc 0.0 0.0}; action=Standing}
-    ] in
+  let enemies = [make_slime 5.0 0.0] in
   make_level 101 "One"
     "Ahh, this planet is covered in pink goo, we can't move!!"
     (-5.0) 0.0 bodies enemies {health=6; time=5.0; shots=1}
@@ -360,9 +320,7 @@ let () = (* Level 3 *)
       {Body.surface=Body.Normal; body={Body.pos=vc 30.0 20.0; mass=100.0; radius=15.0;}};
       {Body.surface=Body.Normal; body={Body.pos=vc 30.0 (-20.0); mass=100.0; radius=15.0;}};
     ] in
-  let enemies = [
-      make_slime 42.0 0.0;
-    ] in
+  let enemies = [make_slime 42.0 0.0] in
   make_level 103 "Three"
     "Black holes ahead, good thing you're too stuck to get sucked in"
     (10.0) 0.0 bodies enemies {health=6; time=5.0; shots=1}
@@ -372,10 +330,7 @@ let () = (* Level rest *)
   let bodies = [
       {Body.surface=Body.Normal; body={Body.pos=vc 0.0 0.0; mass=300.0; radius=5.0;}};
     ] in
-  let enemies = [
-      {Enemy.loc={Body.body={Body.pos=vc 5.0 0.0; mass=1.0; radius=1.0;};
-                  vel=vc 0.0 0.0}; action=Standing}
-    ] in
+  let enemies = [make_slime 5.0 0.0] in
   make_level 104 "Four"
     "TODO: make a level"
     (-5.0) 0.0 bodies enemies {health=6; time=10.0; shots=1};

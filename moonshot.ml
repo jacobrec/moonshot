@@ -1,5 +1,7 @@
 open Raylib
 
+let debug_draw = false
+
 module Body = struct
   type surface_type =
     | Normal
@@ -56,6 +58,7 @@ module Enemy = struct
   type t = {
       loc : Body.moving;
       action : action;
+      angle : float;
     }
   let is_alive x =
     match x.action with

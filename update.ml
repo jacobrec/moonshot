@@ -222,10 +222,10 @@ let update_enemies delta bodies fading enemies =
                                       | _ -> true) enemies in
 
   let update_enemy e =
-    let (loc, _) = if not (on_a_planet e) then
-                     update_planet_collidable delta bodies e.loc
-                   else update_planet_collidable ~no_forces:true delta bodies e.loc in
-    {e with loc} in
+    let (loc, (fx, fy)) = if not (on_a_planet e) then
+                            update_planet_collidable delta bodies e.loc
+                          else update_planet_collidable ~no_forces:true delta bodies e.loc in
+    {e with loc; angle=(Float.atan2 fy fx)} in
   List.map update_enemy enemies
 
 let update_camera cam player =
