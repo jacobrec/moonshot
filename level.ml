@@ -26,20 +26,35 @@ open Moonshot
  * 1-11) Hurty planet special
  * 1-12) Zero G shooting Challenge
  *
- * World 1: The enemy strikes back
- * Introduce sticky planets
+ * World 2: Strange new worlds
+ * Introduce sticky planets, bouncy planets, reverse gravity planets
  * 2-1) Stuck
- * 2-2) Moving
- * 2-3) Jumping
- * 2-4) Planet gravities
- * 2-5) Double Jumping
- * 2-6) Painful Planets
- * 2-7) Friendly Fire
- * 2-8) Stuck on black holes
- * 2-9) Challenge 1
- * 2-10) Challenge 2
- * 2-11) Hurty planet special
- * 2-12) Zero G shooting Challenge
+ * 2-2) Stuck II
+ * 2-3) Stuck III
+ * 2-4) Reverse G
+ * 2-5) Reverse G II
+ * 2-6) Reverse G III
+ * 2-7) Bouncy Planet
+ * 2-8) Bouncy Planet II
+ * 2-9) Bouncy Planet III
+ * 2-10) Challenge
+ * 2-11) ???
+ * 2-12) ???
+ *
+ * World 3: ???
+ * Introduce ???
+ * 2-1) ???
+ * 2-2) ???
+ * 2-3) ???
+ * 2-4) ???
+ * 2-5) ???
+ * 2-6) ???
+ * 2-7) ???
+ * 2-8) ???
+ * 2-9) ???
+ * 2-10) ???
+ * 2-11) ???
+ * 2-12) ???
 *)
 
 let vc = Raylib.Vector2.create
@@ -336,18 +351,42 @@ let () = (* Level 4 *)
     "That's a weird looking planet. I wonder whats up with that?"
     (5.0) 0.0 bodies enemies {health=6; time=3.0; shots=1}
 
+let () = (* Level 5 *)
+  let bodies = [
+      {Body.surface=Body.Sticky; body={Body.pos=vc 0.0 0.0; mass=300.0; radius=5.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 20.0 20.0; mass=(-150.0); radius=10.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 35.0 20.0; mass=100.0; radius=3.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 15.0 (-10.0); mass=(-500.0); radius=4.0;}};
+    ] in
+  let enemies = [make_slime 38.0 20.0] in
+  make_level 105 "Five"
+    "These antigravity planets seem to have different masses too"
+    (5.0) 0.0 bodies enemies {health=6; time=5.0; shots=1}
+
+let () = (* Level 6 *)
+  let bodies = [
+      {Body.surface=Body.Normal; body={Body.pos=vc 0.0 0.0; mass=300.0; radius=5.0;}};
+      {Body.surface=Body.Sticky; body={Body.pos=vc 0.0 30.0; mass=600.0; radius=7.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc (-25.0) 20.0; mass=(-400.0); radius=5.0;}};
+      {Body.surface=Body.Painful; body={Body.pos=vc 25.0 20.0; mass=500.0; radius=5.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 20.0 60.0; mass=100.0; radius=5.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 0.0 65.0; mass=300.0; radius=5.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc (-20.0) 60.0; mass=100.0; radius=5.0;}};
+    ] in
+  let enemies = [make_slime (-20.0) 55.0;
+                 make_slime 0.0 60.0;
+                 make_slime 20.0 55.0;
+                 make_slime 0.0 (-.5.0)] in
+  make_level 106 "Six"
+    "TODO"
+    (0.0) 5.0 bodies enemies {health=6; time=12.0; shots=4}
+
 let () = (* Level rest *)
   let bodies = [
       {Body.surface=Body.Normal; body={Body.pos=vc 0.0 0.0; mass=300.0; radius=5.0;}};
       {Body.surface=Body.Bouncy; body={Body.pos=vc 0.0 10.0; mass=300.0; radius=5.0;}};
     ] in
   let enemies = [make_slime 5.0 0.0] in
-  make_level 105 "Five"
-    "TODO: make a level"
-    (-5.0) 0.0 bodies enemies {health=6; time=10.0; shots=1};
-  make_level 106 "Six"
-    "TODO: make a level"
-    (-5.0) 0.0 bodies enemies {health=6; time=10.0; shots=1};
   make_level 107 "Seven"
     "TODO: make a level"
     (-5.0) 0.0 bodies enemies {health=6; time=10.0; shots=1};

@@ -153,9 +153,9 @@ let draw_text_box ?(centered=false) font x y width fg_color bg_color text =
   draw_centered_text text (x + width/2) (height/2 + y) font fg_color
 
 
-let box_width = 0.2
+let box_width = 0.8
 let box_width = int_of_float (box_width *. (float_of_int Moonshot.screen_width))
-let level_textbox = draw_text_box Moonshot.font_size ((Moonshot.screen_width-box_width) / 2) 0
+let level_textbox = draw_text_box (Moonshot.font_size * 3) ((Moonshot.screen_width-box_width) / 2) 0
                       box_width Color.raywhite Color.darkgray
 
 let draw_playing_starfield stars px py =
