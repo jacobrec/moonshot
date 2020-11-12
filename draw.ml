@@ -64,6 +64,9 @@ let draw_enemy e =
   let c = match e.action with
     | Dead _ -> Color.darkblue
     | _ -> Color.blue in
+
+  let p = sofwv_v e.loc.body.pos in
+  draw_texture_ex (Images.get_animation Images.EnemyStanding) p 0.0 0.5 Color.white;
   draw_body c e.loc.body
 
 let draw_planet p =
@@ -145,9 +148,26 @@ let draw_playing model =
   List.iter draw_planet static;
   List.iter (fun x -> let open Moonshot.Body in draw_body Color.gray x.moving.body) movables;
   List.iter draw_explosion fading;
+  (* Draw Player*)
   List.iter (draw_body Color.lime) @@
     List.map (fun x -> let open Moonshot.Body in x.body) [phead; pfeet];
+  let p = sofwv_v pfeet.body.pos in
+  let (pxh, pyh) = vector phead.body.pos in
+  let (pxf, pyf) = vector pfeet.body.pos in
+  let p_ang = Float.atan2 (pyh -. pyf) (pxh -. pxf) in
+  let p_ang = 90.0 -. p_ang *. 180.0 /. Float.pi in
+  Printf.printf "Ang: %f\n%!" p_ang;
+  let px, py = vector p in
+  let px_off = 10.0 in
+  let py_off = -10.0 in
+  let p = Vector2.create (px +. px_off) (py +. py_off) in
+
+  draw_texture_ex (Images.get Images.PlayerStanding) p p_ang 0.3 Color.white;
+
+  (* Draw Enemies*)
   List.iter draw_enemy enemies;
+
+  (* Draw Aiming lines*)
   (match inp with
    | Moonshot.Player.Aiming (ax, ay) ->
       let bodies = List.map (fun x -> let open Body in ignore (x.surface); x.body) static in

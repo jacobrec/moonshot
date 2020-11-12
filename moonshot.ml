@@ -148,6 +148,8 @@ let sofw = screen_of_world
 let wofs = world_of_screen
 let sofwv = screen_of_world_vector
 let wofsv = world_of_screen_vector
+let sofwv_v v = let (x, y) = screen_of_world_vector v in
+              Vector2.create (float_of_int x) (float_of_int y)
 
 let damage_cooldown = 0.51
 let explosion_time = 0.5
