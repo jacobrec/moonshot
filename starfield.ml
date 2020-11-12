@@ -2,8 +2,8 @@
 
 (* x, y, z  basically *)
 type t = (float * float * float) list
-let width = 1000
-let height = 1000
+let width = 4000
+let height = 4000
 
 let create layer_count total_count : t =
   let flayers =  float_of_int layer_count in
@@ -15,7 +15,6 @@ let create layer_count total_count : t =
                   List.init (int_of_float x)
                     (fun _ ->
                       let z = (float_of_int (layer_count - i)) in
-                      print_float z; print_newline ();
                       (Random.float (float_of_int width), Random.float (float_of_int height), z))
                 ) layers in
   List.flatten stars

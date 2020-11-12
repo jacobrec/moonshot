@@ -240,7 +240,7 @@ let draw_paused model =
   Model.Paused model
 
 
-let menu_starfield = Starfield.create 3 50
+let menu_starfield = Starfield.create 3 800
 let draw_menu_starfield _ =
   Starfield.draw menu_starfield (10.0 *. get_time ()) (get_time ())
     (Moonshot.sofw 1.0) Color.raywhite
