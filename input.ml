@@ -10,7 +10,7 @@ let input_mouse_or_touch _ =
 let input_playing model =
   let open Moonshot.Model in
   let ccw = is_key_down Key.A in
-  let cw = is_key_down Key.S in
+  let cw = is_key_down Key.D || is_key_down Key.S in
   let jump = is_key_down Key.Space in
   let paused = is_key_pressed Key.P in
   let (touched, tv) = input_mouse_or_touch () in
