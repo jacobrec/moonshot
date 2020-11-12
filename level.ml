@@ -378,7 +378,7 @@ let () = (* Level 6 *)
                  make_slime 20.0 55.0;
                  make_slime 0.0 (-.5.0)] in
   make_level 106 "Six"
-    "TODO"
+    "Remember, if you find yourself in a sticky situation, you can hit [p]ause and restart the level."
     (0.0) 5.0 bodies enemies {health=6; time=12.0; shots=4}
 
 let () = (* Level rest *)
