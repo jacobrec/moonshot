@@ -99,20 +99,23 @@ let draw_planet p =
   let surface = p.surface in
   let p = p.body in
   let density = p.mass /. (p.radius *. p.radius) in
+  let adensity = Float.abs (p.mass /. (p.radius *. p.radius)) in
   let color =
-    if density > 30.0 then Color.create 40 10 75 255
-    else if density > 25.0 then Color.darkgray
-    else if density > 20.0 then Color.brown
-    else if density > 15.0 then Color.gray
-    else if density > 10.0 then Color.gold
-    else if density > 5.0 then Color.beige
+    if adensity > 30.0 then Color.create 40 10 75 255
+    else if adensity > 25.0 then Color.darkgray
+    else if adensity > 20.0 then Color.brown
+    else if adensity > 15.0 then Color.gray
+    else if adensity > 10.0 then Color.gold
+    else if adensity > 5.0 then Color.beige
     else Color.lightgray in
   let r = p.radius in
   let (px, py) = sofwv p.pos in
   let pr = float_of_int @@ sofw r in
   match surface with
+  | Body.Bouncy -> draw_circle_gradient px py pr color Color.white
   | Body.Painful -> draw_circle_gradient px py pr color Color.red
   | Body.Sticky  -> draw_circle_gradient px py pr color Color.pink
+  | Body.Normal when density < 0.0 -> draw_circle_gradient px py pr Color.blank color
   | Body.Normal  -> draw_circle px py pr color
 
 let measure_text_wh text size =

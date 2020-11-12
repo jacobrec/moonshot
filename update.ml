@@ -141,12 +141,14 @@ let update_player delta bodies static fading player =
   let touching_ouchy_planets = List.exists (fun b2 -> ignore (b2.surface); bodies_touch base.body b2.body) ouchies in
   let stickies = List.filter (fun x -> x.surface = Sticky) static in
   let touching_sticky_planets = List.exists (fun b2 -> ignore (b2.surface); bodies_touch base.body b2.body) stickies in
+  let bouncies = List.filter (fun x -> x.surface = Bouncy) static in
+  let touching_bouncy_planet = List.exists (fun b2 -> ignore (b2.surface); bodies_touch base.body b2.body) bouncies in
   let in_any_explosion = List.exists (fun b2 -> ignore(b2.remaining);
                                                    bodies_touch base.body b2.body) fading in
   let damaged = (in_any_explosion || touching_ouchy_planets) &&
                   (last_damaged_at +. Moonshot.damage_cooldown < get_time ()) in
   let health = if damaged then health - 1 else health in
-  let input = if damaged then Player.Jump else input in
+  let input = if damaged || touching_bouncy_planet then Player.Jump else input in
   let last_damaged_at = if damaged then get_time () else last_damaged_at in
 
   (* Calculate new base *)
@@ -200,11 +202,29 @@ let explosion_from_body time x =
   (t, {remaining=Moonshot.explosion_time;
        body={x.body with radius=Moonshot.explosion_radius; mass= Moonshot.explosion_mass}})
 
-let update_bullet delta bodies bullet =
+let elastic_collision body planet =
+  let open Body in
+  ignore (planet.surface);
+  let normal_dir = angle_from_vectors body.body.pos planet.body.pos in
+  let rotate_forward = rotate normal_dir in
+  let rotate_back = rotate @@ -. normal_dir in
+  let vx, vy = vector body.vel in
+  let (vpar, vper) = rotate_forward (vx, vy) in
+  let vx, vy = rotate_back (-.Float.abs(vpar), vper) in
+  let vel = Vector2.create vx vy in
+  { body with vel }
+
+let update_bullet delta static bodies bullet =
   let open Body in
   let movable = bullet.moving in
   let moving = update_body delta bodies movable in
-  { bullet with moving }
+  let bouncies = List.filter (fun x -> x.surface = Bouncy) static in
+  let touching_bouncy_planet = List.find_opt (fun b2 -> ignore (b2.surface);
+                                                      bodies_touch bullet.moving.body b2.body)
+                                 bouncies in
+  match touching_bouncy_planet with
+  | None -> { bullet with moving }
+  | Some p -> { bullet with moving=(elastic_collision moving p) }
 
 let update_enemies delta bodies fading enemies =
   let open Moonshot.Enemy in
@@ -297,9 +317,9 @@ let update_playing delta model =
                                    body={x.body with mass= percent *. Moonshot.explosion_mass;
                                                      radius= r +. r *. percent}}) fading in
   let fading = List.filter (fun x -> x.remaining > 0.0) fading in
-  let movables = List.map (update_bullet delta (body_set ~fading ~static ())) bullets in
+  let movables = List.map (update_bullet delta static (body_set ~fading ~static ())) bullets in
   let in_any_static b1 = List.exists (fun b2 -> bodies_touch b1.moving.body b2)
-                           (body_set ~fading ~static ~enemies ()) in
+                           (body_set ~fading ~static:(List.filter (fun x -> x.surface <> Body.Bouncy) static) ~enemies ()) in
   let (dead, alive) = List.partition in_any_static movables in
   let create_explosions = List.map (explosion_from_body runtime) dead in
   let bullet_time = List.map (fun (a, _) -> a) create_explosions in

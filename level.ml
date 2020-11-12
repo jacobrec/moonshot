@@ -325,15 +325,23 @@ let () = (* Level 3 *)
     "Black holes ahead, good thing you're too stuck to get sucked in"
     (10.0) 0.0 bodies enemies {health=6; time=5.0; shots=1}
 
+let () = (* Level 4 *)
+  let bodies = [
+      {Body.surface=Body.Normal; body={Body.pos=vc 0.0 0.0; mass=300.0; radius=5.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 30.0 0.0; mass=500.0; radius=5.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 15.0 5.0; mass=(-500.0); radius=5.0;}};
+    ] in
+  let enemies = [make_slime 25.0 0.0] in
+  make_level 104 "Four"
+    "That's a weird looking planet. I wonder whats up with that?"
+    (5.0) 0.0 bodies enemies {health=6; time=3.0; shots=1}
 
 let () = (* Level rest *)
   let bodies = [
       {Body.surface=Body.Normal; body={Body.pos=vc 0.0 0.0; mass=300.0; radius=5.0;}};
+      {Body.surface=Body.Bouncy; body={Body.pos=vc 0.0 10.0; mass=300.0; radius=5.0;}};
     ] in
   let enemies = [make_slime 5.0 0.0] in
-  make_level 104 "Four"
-    "TODO: make a level"
-    (-5.0) 0.0 bodies enemies {health=6; time=10.0; shots=1};
   make_level 105 "Five"
     "TODO: make a level"
     (-5.0) 0.0 bodies enemies {health=6; time=10.0; shots=1};

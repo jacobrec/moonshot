@@ -7,6 +7,7 @@ module Body = struct
     | Normal
     | Painful
     | Sticky
+    | Bouncy
 
   type t = {
       pos: Vector2.t; (* in meters *)
