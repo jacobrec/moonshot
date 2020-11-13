@@ -162,7 +162,7 @@ let draw_text_box ?(centered=false) font x y width fg_color bg_color text =
 let box_width = 0.8
 let box_width = int_of_float (box_width *. (float_of_int Moonshot.screen_width))
 let level_textbox = draw_text_box (Moonshot.font_size * 3) ((Moonshot.screen_width-box_width) / 2) 0
-                      box_width Color.raywhite Color.darkgray
+                      box_width Color.raywhite (Color.create 49 49 49 100)
 
 let draw_playing_starfield stars px py =
   let star_backoff = 4.0 in
@@ -217,7 +217,7 @@ let draw_playing model =
   let trunc_time = (float_of_int (int_of_float (runtime *. 100.0))) /. 100.0 in
   draw_text (string_of_float trunc_time) (Moonshot.screen_width - 50) 10 14 Color.gold;
 
-  if runtime < 8.0 then
+  if runtime < 5.0 then
     level_textbox model.start_text;
 
   end_drawing ();
