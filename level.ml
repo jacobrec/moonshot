@@ -431,15 +431,44 @@ let () = (* Level 9 *)
     "Caution low gravity zone. It'll be hard to curve shots here"
     (0.0) (10.0) bodies enemies {health=6; time=5.0; shots=1}
 
+let () = (* Level 10 *)
+  let curve theta_from theta_to radius planets size surface mass ?(mass_to=mass) cx cy =
+    let fplanets = float_of_int planets in
+    let dtheta = (theta_to -. theta_from) /. fplanets in
+    let dmass = (mass_to -. mass) /. fplanets in
+    List.init planets (fun i ->
+        let fi = (float_of_int i) in
+        let theta = theta_from +. fi *. dtheta in
+        let x = cx +. radius *. Float.cos theta in
+        let y = cy +. radius *. Float.sin theta in
+        {Body.surface=surface; body={Body.pos=vc x y; mass=(mass +. dmass *. fi); radius=size;}};
+      ) in
+  let bodies = [
+    ] in
+  let tc = 7 in
+  let span = 1.0 in
+  let delta = span /. (float_of_int tc) in
+  let curve_bodies = curve 0.0 (span *. 2.0 -. delta) 100.0 2 4.0 Body.Normal 200.0 ~mass_to:600.0 0.0 0.0 in
+  let curve_bodies_bounce = curve delta (span -. delta) 100.0 (tc-2) 5.1
+                              Body.Bouncy 200.0 ~mass_to:450.0 0.0 0.0 in
+  let bodies = List.concat [bodies; curve_bodies; curve_bodies_bounce] in
+  let enemies = [
+      make_slime (50.0) (86.0);
+      make_slime (70.0) (70.0);
+      make_slime (86.0) (50.0);
+      make_slime (94.0) (34.0);
+    ] in
+
+  make_level 110 "Ten"
+    "Do or do not, there is no try. --Yoda"
+    (105.0) (0.0) bodies enemies {health=6; time=20.0; shots=4}
+
 let () = (* Level rest *)
   let bodies = [
       {Body.surface=Body.Normal; body={Body.pos=vc 0.0 0.0; mass=300.0; radius=5.0;}};
       {Body.surface=Body.Bouncy; body={Body.pos=vc 0.0 10.0; mass=300.0; radius=5.0;}};
     ] in
   let enemies = [make_slime 5.0 0.0] in
-  make_level 110 "Ten"
-    "TODO: make a level"
-    (-5.0) 0.0 bodies enemies {health=6; time=10.0; shots=1};
   make_level 111 "Eleven"
     "TODO: make a level"
     (-5.0) 0.0 bodies enemies {health=6; time=10.0; shots=1};
