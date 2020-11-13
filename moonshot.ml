@@ -46,6 +46,7 @@ module Player = struct
     | Standing
     | Falling
     | Walking
+    | WalkingReverse
 
   type t = {
       head : Body.moving;
@@ -123,7 +124,7 @@ module Model = struct
     | StatsScreen of (int * int Option.t) Option.t
 end
 
-let ssize = 55
+let ssize = 155
 let screen_width = 16 * ssize
 let screen_height = 9 * ssize
 let font_size = ssize * 12 / 65

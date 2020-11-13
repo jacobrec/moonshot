@@ -74,22 +74,28 @@ let draw_texture text wloc ang size =
 
 let draw_enemy e =
   let open Moonshot.Enemy in
-  let c = match e.action with
-    | Dead _ -> Color.darkblue
-    | _ -> Color.blue in
+  let c, t = match e.action with
+    | Dead _ -> Color.darkblue, Images.get Images.EnemyDead
+    | _ -> Color.blue, Images.get_animation Images.EnemyStanding in
 
   let size = 2.0 in
-  draw_texture (Images.get_animation Images.EnemyStanding) e.loc.body.pos e.angle size;
+  draw_texture t e.loc.body.pos e.angle size;
   if Moonshot.debug_draw then
     draw_body c e.loc.body
 
-let draw_player pfeet phead =
+let draw_player ani pfeet phead =
   let open Moonshot.Body in
   let (pxh, pyh) = vector phead.body.pos in
   let (pxf, pyf) = vector pfeet.body.pos in
   let p_angr = Float.atan2 (pyf -. pyh) (pxf -. pxh) in
   let size = 3.5 in
-  draw_texture (Images.get Images.PlayerStanding) phead.body.pos p_angr size;
+  let tex = match ani with
+    | Player.Standing -> (Images.get Images.PlayerStanding)
+    | Player.Walking -> Images.get_animation Images.PlayerWalking
+    | Player.WalkingReverse -> Images.get_animation Images.PlayerWalkingReverse
+    | Player.Falling -> Images.get_animation Images.PlayerFalling in
+
+  draw_texture tex phead.body.pos p_angr size;
   if Moonshot.debug_draw then
     List.iter (draw_body Color.lime) @@ List.map (fun x -> x.body) [phead; pfeet]
 
@@ -165,7 +171,7 @@ let draw_playing_starfield stars px py =
 
 let draw_playing model =
   let { Moonshot.Model.bullets=movables; static; fading;
-        player={feet=pfeet; head=phead; input=inp; health; _}; enemies; cam; runtime; _} = model in
+        player={animation_state=ani; feet=pfeet; head=phead; input=inp; health; _}; enemies; cam; runtime; _} = model in
   let player = model.player in
   begin_drawing ();
   clear_background Color.black;
@@ -177,7 +183,7 @@ let draw_playing model =
   List.iter (fun x -> let open Moonshot.Body in draw_body Color.gray x.moving.body) movables;
   List.iter draw_explosion fading;
   (* Draw Player*)
-  draw_player pfeet phead;
+  draw_player ani pfeet phead;
 
   (* Draw Enemies*)
   List.iter draw_enemy enemies;

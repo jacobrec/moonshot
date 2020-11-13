@@ -143,6 +143,7 @@ let update_player delta bodies static fading player =
   let touching_sticky_planets = List.exists (fun b2 -> ignore (b2.surface); bodies_touch base.body b2.body) stickies in
   let bouncies = List.filter (fun x -> x.surface = Bouncy) static in
   let touching_bouncy_planet = List.exists (fun b2 -> ignore (b2.surface); bodies_touch base.body b2.body) bouncies in
+  let touching_a_planet = List.exists (fun b2 -> ignore (b2.surface); bodies_touch base.body b2.body) static in
   let in_any_explosion = List.exists (fun b2 -> ignore(b2.remaining);
                                                    bodies_touch base.body b2.body) fading in
   let damaged = (in_any_explosion || touching_ouchy_planets) &&
@@ -150,6 +151,10 @@ let update_player delta bodies static fading player =
   let health = if damaged then health - 1 else health in
   let input = if damaged || touching_bouncy_planet then Player.Jump else input in
   let last_damaged_at = if damaged then get_time () else last_damaged_at in
+  let animation_state = if not touching_a_planet then Player.Falling
+                        else if input = Player.CW then Player.WalkingReverse
+                        else if input = Player.CCW then Player.Walking
+                        else Player.Standing in
 
   (* Calculate new base *)
   let (new_b, (b_fx, b_fy)) = update_planet_collidable ~inp:(Some input) delta bodies base in
@@ -162,7 +167,7 @@ let update_player delta bodies static fading player =
   Vector2.set_x new_f.body.pos ((Vector2.x new_b.body.pos) +. seperation *. Float.cos gravity_dir);
   Vector2.set_y new_f.body.pos ((Vector2.y new_b.body.pos) +. seperation *. Float.sin gravity_dir);
 
-  {player with Moonshot.Player.head=new_f; feet=new_b; health; last_damaged_at}
+  {player with Moonshot.Player.head=new_f; feet=new_b; health; last_damaged_at; animation_state}
 
 let truncate_aim ax ay px py =
   let aim_length = 10.0 in
