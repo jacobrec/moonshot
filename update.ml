@@ -133,7 +133,7 @@ let update_planet_collidable ?(inp=None) ?(no_forces=false) delta bodies base =
   (b''', (b_fx, b_fy))
 
 let update_player delta bodies static fading player =
-  let {Moonshot.Player.head=float; feet=base; input; health; last_damaged_at} = player in
+  let {Moonshot.Player.head=float; feet=base; input; health; last_damaged_at; _} = player in
   (* player is like a balloon attached to a rock at a fixed distance *)
   let open Moonshot.Body in
 

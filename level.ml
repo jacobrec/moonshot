@@ -82,6 +82,7 @@ let make_level id name start_text px py bodies enemies star_reqs =
           Body.body={pos=vc x (y +. 1.0); mass= -3.5; radius=0.5;}; vel=vc 0.0 0.0};
       input=Player.None;
       Player.health=6;
+      animation_state=Player.Standing;
       last_damaged_at=0.0;
     } in
   let stars = Starfield.create 8 6400 in

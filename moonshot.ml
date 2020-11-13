@@ -42,12 +42,18 @@ module Player = struct
     | Fire of float * float
     | None
 
+  type animation_action =
+    | Standing
+    | Falling
+    | Walking
+
   type t = {
       head : Body.moving;
       feet : Body.moving;
       input: input_type;
       health : int;
       last_damaged_at : float;
+      animation_state : animation_action;
     }
 end
 

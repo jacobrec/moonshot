@@ -1,5 +1,11 @@
 type images =
   | PlayerStanding
+  | PlayerWalking1
+  | PlayerWalking2
+  | PlayerWalking3
+  | PlayerWalking4
+  | PlayerFalling1
+  | PlayerFalling2
   | EnemyStanding1
   | EnemyStanding2
   | EnemyStanding3
@@ -10,6 +16,12 @@ let texture_map = Hashtbl.create 10
 let get_path_from_image img =
   match img with
   | PlayerStanding -> "img/player/standing.png"
+  | PlayerFalling1 -> "img/player/falling/1.png"
+  | PlayerFalling2 -> "img/player/falling/0.png"
+  | PlayerWalking1 -> "img/player/walking/1.png"
+  | PlayerWalking2 -> "img/player/walking/2.png"
+  | PlayerWalking3 -> "img/player/walking/3.png"
+  | PlayerWalking4 -> "img/player/walking/0.png"
   | EnemyStanding1 -> "img/enemy/standing/1.png"
   | EnemyStanding2 -> "img/enemy/standing/2.png"
   | EnemyStanding3 -> "img/enemy/standing/3.png"
@@ -28,15 +40,23 @@ let get image =
 
 type animation =
   | EnemyStanding
+  | PlayerWalking
+  | PlayerFalling
+
+let get_animation_frame frame_time frames =
+  let t = Raylib.get_time () in
+  let frame = int_of_float (t /. frame_time) in
+  let frame = frame mod List.length frames in
+  get (List.nth frames frame)
 
 let get_animation ani =
-  let t = Raylib.get_time () in
   match ani with
+  | PlayerWalking
+  | PlayerFalling
   | EnemyStanding ->
-     let frame = int_of_float (t *. 10.0) in
-     let frame = frame mod 4 in
-     match frame with
-     | 1 -> get EnemyStanding1
-     | 2 -> get EnemyStanding2
-     | 3 -> get EnemyStanding3
-     | _ -> get EnemyStanding4
+     get_animation_frame 0.1 [
+         EnemyStanding1;
+         EnemyStanding2;
+         EnemyStanding3;
+         EnemyStanding4;
+       ]
