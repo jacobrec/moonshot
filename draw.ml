@@ -192,7 +192,7 @@ let draw_playing model =
   (match inp with
    | Moonshot.Player.Aiming (ax, ay) ->
       let bodies = List.map (fun x -> let open Body in ignore (x.surface); x.body) static in
-      draw_aim_assist bodies 5 0.15 ax ay player;
+      draw_aim_assist bodies 50 0.15 ax ay player;
       let (px, py) = vector phead.body.pos in
       let (ax, ay) = Update.truncate_aim ax ay px py in
       let (ax, ay) = sofwv (Vector2.create ax ay) in

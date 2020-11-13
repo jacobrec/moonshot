@@ -74,7 +74,7 @@ let rotate theta (x, y) =
   let y' = -.(x *. Float.sin theta) +. (y *. Float.cos theta) in
   (x', y')
 
-let update_planet_collidable ?(inp=None) ?(no_forces=false) delta bodies base =
+let update_planet_collidable ?(inp=None) ?(slipping=false) ?(no_forces=false) delta bodies base =
   let open Moonshot.Body in
 
   let b = base in
@@ -105,7 +105,7 @@ let update_planet_collidable ?(inp=None) ?(no_forces=false) delta bodies base =
                in
 
                (* Friction *)
-               let friction = 0.50 in
+               let friction = if slipping then 1.0 else 0.50 in
                let vper = friction *. vper in
                let vper = if (Float.abs vper) < 2.0 then 0.0 else vper in
 

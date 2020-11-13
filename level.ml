@@ -432,6 +432,30 @@ let () = (* Level 9 *)
     (0.0) (10.0) bodies enemies {health=6; time=5.0; shots=1}
 
 let () = (* Level 10 *)
+  let bodies = [
+      {Body.surface=Body.Normal; body={Body.pos=vc 100.0 0.0; mass=300.0; radius=7.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 85.0 (-6.0); mass= -300.0; radius=3.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 70.0 0.0; mass=500.0; radius=7.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 55.0 (-6.0); mass= -300.0; radius=3.0;}};
+      {Body.surface=Body.Sticky; body={Body.pos=vc 40.0 0.0; mass=800.0; radius=7.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 45.0 (-7.5); mass= -100.0; radius=2.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 40.0 (-9.0); mass= -100.0; radius=2.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 35.0 (-7.5); mass= -100.0; radius=2.0;}};
+
+      {Body.surface=Body.Normal; body={Body.pos=vc 0.0 20.0; mass=10.0; radius=7.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 0.0 (-20.0); mass=100.0; radius=7.0;}};
+      {Body.surface=Body.Bouncy; body={Body.pos=vc (-13.0) (8.0); mass=10.0; radius=5.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc (-10.0) (-10.0); mass=200.0; radius=1.0;}};
+    ] in
+  let enemies = [make_slime (100.0) (-8.0);
+                 make_slime (-7.0) (20.0);
+                 make_slime (-7.0) (-20.0)] in
+
+  make_level 110 "Ten"
+    "Insert message here"
+    (100.0) (10.0) bodies enemies {health=6; time=25.0; shots=3}
+
+let () = (* Level 11 *)
   let curve theta_from theta_to radius planets size surface mass ?(mass_to=mass) cx cy =
     let fplanets = float_of_int planets in
     let dtheta = (theta_to -. theta_from) /. fplanets in
@@ -459,22 +483,36 @@ let () = (* Level 10 *)
       make_slime (94.0) (34.0);
     ] in
 
-  make_level 110 "Ten"
+  make_level 111 "Eleven"
     "Do or do not, there is no try. --Yoda"
     (105.0) (0.0) bodies enemies {health=6; time=20.0; shots=4}
 
-let () = (* Level rest *)
+
+
+
+let () = (* Level 12 *)
   let bodies = [
-      {Body.surface=Body.Normal; body={Body.pos=vc 0.0 0.0; mass=300.0; radius=5.0;}};
-      {Body.surface=Body.Bouncy; body={Body.pos=vc 0.0 10.0; mass=300.0; radius=5.0;}};
+      {Body.surface=Body.Sticky; body={Body.pos=vc 0.0 0.0; mass=150.0; radius=1.0;}};
     ] in
-  let enemies = [make_slime 5.0 0.0] in
-  make_level 111 "Eleven"
-    "TODO: make a level"
-    (-5.0) 0.0 bodies enemies {health=6; time=10.0; shots=1};
+  let eloc r theta =
+    let r = float_of_int r in
+    let theta = (float_of_int theta) *. Float.pi /. 180.0 in
+    let x = r *. Float.cos theta in
+    let y = r *. Float.sin theta in
+    make_slime x y in
+  let enemies = [
+      (* radius angle[degrees] *)
+      eloc 20 30;
+      eloc 30 150;
+      eloc 40 90;
+      eloc 50 45;
+      eloc 60 135;
+      eloc 65 180;
+      eloc 65 0;
+    ] in
   make_level 112 "Twelve"
-    "TODO: make a level"
-    (-5.0) 0.0 bodies enemies {health=6; time=10.0; shots=1}
+    "Ahh, they're attacking back. Careful not to blow yourself up"
+    (0.0) 1.0 bodies enemies {health=6; time=15.0; shots=6}
 
 end
 
