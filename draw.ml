@@ -41,15 +41,26 @@ let draw_dotted_line color max_length x1 y1 x2 y2 =
       end in
   inner solid_segments x1 y1
 
-let draw_aim_assist bodies dots freq ax ay player =
+let draw_aim_assist static dots freq ax ay player =
   let open Moonshot.Player in
+  let open Moonshot.Body in
+  let (bouncy, not_bouncy) = List.partition (fun x -> x.surface = Body.Bouncy) static in
+  let bodies = List.map (fun x -> ignore (x.surface); x.body) static in
+  let is_in_bouncy b =
+    List.find_opt (fun x -> ignore (x.surface); Update.bodies_touch x.body b) bouncy in
+  let should_dead b =
+    List.exists (fun x -> ignore (x.surface); Update.bodies_touch x.body b) not_bouncy in
   let timing = 0.0167 in
   let total = int_of_float ((float_of_int dots) /. 0.0167 *. freq) + 1 in
   let bullet = Update.create_bullet_from_aim ax ay player.head in
-  let (all, _) = List.fold_left (fun (acc, b) x ->
-                     let b' = (Update.update_body x bodies b) in
-                     ((b' :: acc), b'))
-                   ([], bullet) (List.init total (fun _ -> timing)) in
+  let (all, _, _) = List.fold_left (fun (acc, b, stop) x ->
+                        if stop then (acc, b, stop) else
+                          let b' = (Update.update_body x bodies b) in
+                          let b'' = match is_in_bouncy b'.body with
+                            | Some p -> Update.elastic_collision b' p
+                            | None -> b' in
+                          ((b'' :: acc), b'', should_dead b''.body))
+                   ([], bullet, false) (List.init total (fun _ -> timing)) in
   let filteri f l =
     let rec inner f l i =
       match l with
@@ -191,8 +202,7 @@ let draw_playing model =
   (* Draw Aiming lines*)
   (match inp with
    | Moonshot.Player.Aiming (ax, ay) ->
-      let bodies = List.map (fun x -> let open Body in ignore (x.surface); x.body) static in
-      draw_aim_assist bodies 50 0.15 ax ay player;
+      draw_aim_assist static Moonshot.aim_assist_dots 0.15 ax ay player;
       let (px, py) = vector phead.body.pos in
       let (ax, ay) = Update.truncate_aim ax ay px py in
       let (ax, ay) = sofwv (Vector2.create ax ay) in

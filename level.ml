@@ -452,8 +452,8 @@ let () = (* Level 10 *)
                  make_slime (-7.0) (-20.0)] in
 
   make_level 110 "Ten"
-    "Insert message here"
-    (100.0) (10.0) bodies enemies {health=6; time=25.0; shots=3}
+    "Why are we killing slimes again?"
+    (100.0) (10.0) bodies enemies {health=6; time=22.0; shots=3}
 
 let () = (* Level 11 *)
   let curve theta_from theta_to radius planets size surface mass ?(mass_to=mass) cx cy =
@@ -512,7 +512,7 @@ let () = (* Level 12 *)
     ] in
   make_level 112 "Twelve"
     "Ahh, they're attacking back. Careful not to blow yourself up"
-    (0.0) 1.0 bodies enemies {health=6; time=15.0; shots=6}
+    (0.0) 1.0 bodies enemies {health=6; time=15.0; shots=7}
 
 end
 

@@ -167,3 +167,4 @@ let explosion_time = 0.5
 let explosion_mass = -100.0
 let explosion_radius = 3.0
 
+let aim_assist_dots = 5
