@@ -232,20 +232,28 @@ let draw_playing model =
   end_mode_2d ();
 
   (* Draw HUD *)
-  let heart_space = 30 in
-  let heart_radius = 10.0 in
-  let heart_offset = 15 in
+  let heart_radius = (float_of_int Moonshot.ssize) /. 6.0 in
+  let heart_space = 3 * (int_of_float heart_radius) in
+  let heart_offset = (int_of_float (1.5 *. heart_radius)) in
   let draw_hearts i =
     let xs = List.init i (fun i -> heart_offset + heart_space * i) in
-    List.iter (fun x -> draw_circle x heart_offset heart_radius Color.red) xs in
+    List.iter (fun x ->
+        let fx, fy = float_of_int x, float_of_int heart_offset in
+        draw_texture_hud (Images.get Images.HeartFull) (Vector2.create fx fy) (3*(int_of_float heart_radius));
+        if Moonshot.debug_draw then draw_circle x heart_offset heart_radius Color.red
+      ) xs in
   let draw_half_heart x =
-    draw_circle x heart_offset (heart_radius/.2.0) Color.red in
+    let fx, fy = float_of_int x, float_of_int heart_offset in
+    draw_texture_hud (Images.get Images.HeartHalf) (Vector2.create fx fy) (3*(int_of_float heart_radius));
+    if Moonshot.debug_draw then draw_circle x heart_offset (heart_radius/.2.0) Color.red
+  in
   draw_hearts (health / 2);
   if health mod 2 == 1 then
     draw_half_heart (heart_offset + heart_space * (health / 2));
 
+  let fsize = Moonshot.font_size in
   let trunc_time = (float_of_int (int_of_float (runtime *. 100.0))) /. 100.0 in
-  draw_text (string_of_float trunc_time) (Moonshot.screen_width - 50) 10 14 Color.gold;
+  draw_text (string_of_float trunc_time) (Moonshot.screen_width - (fsize * 5)) fsize fsize Color.gold;
 
   if runtime < 5.0 then
     level_textbox model.start_text;
