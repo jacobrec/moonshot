@@ -44,7 +44,7 @@ let draw_dotted_line color max_length x1 y1 x2 y2 =
 let draw_aim_assist static dots freq ax ay player =
   let open Moonshot.Player in
   let open Moonshot.Body in
-  let (bouncy, not_bouncy) = List.partition (fun x -> x.surface = Body.Bouncy) static in
+  let (bouncy, not_bouncy) = List.partition (fun x -> ignore (x.surface = Body.Bouncy); false) static in
   let bodies = List.map (fun x -> ignore (x.surface); x.body) static in
   let is_in_bouncy b =
     List.find_opt (fun x -> ignore (x.surface); Update.bodies_touch x.body b) bouncy in
@@ -82,6 +82,18 @@ let draw_texture text wloc ang size =
             (py +. (p_off *. Float.sin ang) +. p_off *. Float.cos ang) in
 
   draw_texture_ex text p p_ang sf Color.white
+
+let draw_texture_hud text wloc size =
+  let psize = size in
+  let tsize = Texture2D.width text in
+  let sf = (float_of_int psize) /. (float_of_int tsize) in
+  let p = wloc in
+  let px, py = vector p in
+  let p_off = (float_of_int tsize *. sf) /. 2.0 in
+  let p = Vector2.create (px -. p_off) (py -. p_off) in
+
+
+  draw_texture_ex text p 0.0 sf Color.white
 
 let draw_enemy e =
   let open Moonshot.Enemy in
@@ -191,7 +203,15 @@ let draw_playing model =
   draw_playing_starfield model.stars px py;
   begin_mode_2d cam;
   List.iter draw_planet static;
-  List.iter (fun x -> let open Moonshot.Body in draw_body Color.gray x.moving.body) movables;
+
+  (* Draw bullets *)
+  List.iter (fun x -> let open Moonshot.Body in
+                      draw_texture (Images.get_animation Images.BulletFlying)
+                        x.moving.body.pos 0.0 (2.0 *. x.moving.body.radius);
+                      if Moonshot.debug_draw then
+                        draw_body Color.gray x.moving.body
+    ) movables;
+
   List.iter draw_explosion fading;
   (* Draw Player*)
   draw_player ani pfeet phead;
@@ -294,7 +314,11 @@ let draw_stars fcolor scolor has_health_star has_shot_star has_time_star =
   let draw_star x =
     let r = Moonshot.ssize / 2 in
     let y = ty - (2*r) in
-    draw_circle x y (float_of_int r) scolor in
+    let xf = float_of_int x in
+    let yf = float_of_int y in
+    if Moonshot.debug_draw then draw_circle x y (float_of_int r) scolor;
+    draw_texture_hud (Images.get_animation Images.StarShine) (Vector2.create xf yf) (2*r)
+    in
 
   if has_health_star then draw_star x1;
   if has_shot_star then draw_star x2;

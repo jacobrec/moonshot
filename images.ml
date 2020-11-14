@@ -1,90 +1,79 @@
+type animation =
+  | EnemyStanding
+  | PlayerWalking
+  | PlayerWalkingReverse
+  | PlayerFalling
+  | BulletFlying
+  | StarShine
+
 type images =
   | PlayerStanding
-  | PlayerWalking1
-  | PlayerWalking2
-  | PlayerWalking3
-  | PlayerWalking4
-  | PlayerWalkingReverse1
-  | PlayerWalkingReverse2
-  | PlayerWalkingReverse3
-  | PlayerWalkingReverse4
-  | PlayerFalling1
-  | PlayerFalling2
-  | EnemyStanding1
-  | EnemyStanding2
-  | EnemyStanding3
-  | EnemyStanding4
   | EnemyDead
+  | HeartFull
+  | HeartHalf
+  | HeartNone
+
+type t =
+  | Animation of (animation * int)
+  | Image of images
 
 let texture_map = Hashtbl.create 10
 
 let get_path_from_image img =
   match img with
   | PlayerStanding -> "img/player/standing.png"
-  | PlayerFalling1 -> "img/player/falling/1.png"
-  | PlayerFalling2 -> "img/player/falling/0.png"
-  | PlayerWalking1 -> "img/player/walking/1.png"
-  | PlayerWalking2 -> "img/player/walking/2.png"
-  | PlayerWalking3 -> "img/player/walking/3.png"
-  | PlayerWalking4 -> "img/player/walking/0.png"
-  | PlayerWalkingReverse1 -> "img/player/walking_rev/1.png"
-  | PlayerWalkingReverse2 -> "img/player/walking_rev/2.png"
-  | PlayerWalkingReverse3 -> "img/player/walking_rev/3.png"
-  | PlayerWalkingReverse4 -> "img/player/walking_rev/0.png"
-  | EnemyStanding1 -> "img/enemy/standing/1.png"
-  | EnemyStanding2 -> "img/enemy/standing/2.png"
-  | EnemyStanding3 -> "img/enemy/standing/3.png"
-  | EnemyStanding4 -> "img/enemy/standing/0.png"
   | EnemyDead -> "img/enemy/dead.png"
+  | HeartFull -> "img/heart/full.png"
+  | HeartHalf -> "img/heart/half.png"
+  | HeartNone -> "img/heart/empty.png"
+
+(* Important animation constants *)
+let get_animation_frame ani =
+  let f_time, frames =
+    match ani with
+    | PlayerWalking | PlayerWalkingReverse -> 0.1, 4
+    | StarShine -> 0.05, 16
+    | EnemyStanding -> 0.1, 4
+    | BulletFlying -> 0.08, 8
+    | PlayerFalling -> 0.2, 2 in
+  let t = Raylib.get_time () in
+  let frame = int_of_float (t /. f_time) in
+  if ani = StarShine then
+    let f = frame mod (3 * frames) in
+    if f >= frames then 0 else f
+  else frame mod frames
+
+let get_path_from_animation img frame =
+  let f = string_of_int frame in
+  let pref = match img with
+  | EnemyStanding -> "img/enemy/standing/"
+  | BulletFlying -> "img/bullet/flying/"
+  | StarShine -> "img/star/"
+  | PlayerFalling -> "img/player/falling/"
+  | PlayerWalking -> "img/player/walking/"
+  | PlayerWalkingReverse -> "img/player/walking_rev/" in
+  pref ^ f ^ ".png"
 
 let load_image img =
-  let img_path = get_path_from_image img in
+  let img_path = match img with
+  | Animation (a, i) -> get_path_from_animation a i
+  | Image i -> get_path_from_image i in
   let t = Raylib.load_texture img_path in
   Hashtbl.add texture_map img t;
   t
 
+
 let get image =
-  match Hashtbl.find_opt texture_map image with
-  | None -> load_image image
+  let i = (Image image) in
+  match Hashtbl.find_opt texture_map i with
+  | None -> load_image i
   | Some t -> t
 
-type animation =
-  | EnemyStanding
-  | PlayerWalking
-  | PlayerWalkingReverse
-  | PlayerFalling
-
-let get_animation_frame frame_time frames =
-  let t = Raylib.get_time () in
-  let frame = int_of_float (t /. frame_time) in
-  let frame = frame mod List.length frames in
-  get (List.nth frames frame)
-
 let get_animation ani =
-  match ani with
-  | PlayerWalking ->
-     get_animation_frame 0.1 [
-         PlayerWalking1;
-         PlayerWalking2;
-         PlayerWalking3;
-         PlayerWalking4;
-       ]
-  | PlayerWalkingReverse ->
-     get_animation_frame 0.1 [
-         PlayerWalkingReverse1;
-         PlayerWalkingReverse2;
-         PlayerWalkingReverse3;
-         PlayerWalkingReverse4;
-       ]
-  | PlayerFalling ->
-     get_animation_frame 0.3 [
-         PlayerFalling1;
-         PlayerFalling2;
-       ]
-  | EnemyStanding ->
-     get_animation_frame 0.1 [
-         EnemyStanding1;
-         EnemyStanding2;
-         EnemyStanding3;
-         EnemyStanding4;
-       ]
+  let f = get_animation_frame ani in
+  let i = (Animation (ani, f)) in
+  match Hashtbl.find_opt texture_map i with
+  | None -> load_image i
+  | Some t -> t
+
+
