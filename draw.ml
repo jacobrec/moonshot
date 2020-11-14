@@ -188,7 +188,7 @@ let level_textbox = draw_text_box (Moonshot.font_size * 3) ((Moonshot.screen_wid
                       box_width Color.raywhite (Color.create 49 49 49 100)
 
 let draw_playing_starfield stars px py =
-  let star_backoff = 4.0 in
+  let star_backoff = 5.0 in
   let (px, py) = (px /. star_backoff, py /. star_backoff) in
   Starfield.draw stars px py (Moonshot.sofw (1.0 /. star_backoff)) Color.raywhite
 
