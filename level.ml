@@ -202,7 +202,7 @@ module World1 = struct
     let enemies = [make_slime (-103.0) (2.0)] in
     make_level 6 "Six"
       "Some planets are painful to touch"
-      14.0 2.0 bodies enemies {health=6; time=13.0; shots=1}
+      14.0 2.0 bodies enemies {health=6; time=11.0; shots=1}
 
   let () = (* Level 7 *)
     let bodies = [
@@ -355,7 +355,7 @@ let () = (* Level 4 *)
 let () = (* Level 5 *)
   let bodies = [
       {Body.surface=Body.Sticky; body={Body.pos=vc 0.0 0.0; mass=300.0; radius=5.0;}};
-      {Body.surface=Body.Normal; body={Body.pos=vc 20.0 20.0; mass=(-150.0); radius=10.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 20.0 18.0; mass=(-150.0); radius=10.0;}};
       {Body.surface=Body.Normal; body={Body.pos=vc 35.0 20.0; mass=100.0; radius=3.0;}};
       {Body.surface=Body.Normal; body={Body.pos=vc 15.0 (-10.0); mass=(-500.0); radius=4.0;}};
     ] in
@@ -409,7 +409,7 @@ let () = (* Level 8 *)
   let bodies = List.concat
                  [List.flatten tunnel;
                   [
-                    {Body.surface=Body.Normal;body={Body.pos=vc 0.0 0.0; mass=200.0; radius=2.0;}};
+                    {Body.surface=Body.Sticky;body={Body.pos=vc 0.0 0.0; mass=200.0; radius=2.0;}};
                     {Body.surface=Body.Normal;body={Body.pos=vc 45.0 0.0; mass=500.0; radius=2.0;}};
                  ]] in
   let enemies = [make_slime 45.0 (-.2.0);
@@ -417,7 +417,7 @@ let () = (* Level 8 *)
                  make_slime (-5.0) (0.0)] in
   make_level 108 "Eight"
     "Boooiiing! Are you having fun yet?"
-    (0.0) 5.0 bodies enemies {health=6; time=7.0; shots=3}
+    (4.0) 0.0 bodies enemies {health=6; time=7.0; shots=2}
 
 let () = (* Level 9 *)
   let bodies = [
