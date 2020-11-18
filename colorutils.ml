@@ -1,7 +1,8 @@
 let fmodi f i =
   let ff, fi = Float.modf f in
   let fi = int_of_float fi in
-  ff +. float_of_int (fi mod i)
+  let f = ff +. float_of_int (fi mod i) in
+  if f < 0.0 then f +. float_of_int i else f
 
 (** Expects values to be from [0,255]
 * returns values in range [0-360), [0-100), [0-100) *)
@@ -56,3 +57,9 @@ let hsva_of_rgba (r, g, b, a) =
 let rgba_of_hsva (h, s, v, a) =
   let r, g, b = rgb_of_hsv h, s, v in
   r, g, b, a
+
+let () =
+  let r, g, b = (235, 100, 183) in
+  let h, s, v = hsv_of_rgb (r, g, b) in
+  let r', g', b' = rgb_of_hsv (h, s, v) in
+  Printf.printf "rgb[%d, %d, %d] -> hsv[%d, %d, %d] -> rgb[%d, %d, %d]\n%!" r g b h s v r' g' b'

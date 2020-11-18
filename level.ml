@@ -523,6 +523,15 @@ let () = (* Level 1 *)
     "Brrrr, its cold and slippery here"
     (-25.0) 0.0 bodies enemies {health=6; time=6.0; shots=1}
 
+let () = (* Level 2 *)
+  let bodies = [
+      {Body.surface=Body.Sticky; body={Body.pos=vc 0.0 0.0; mass=400.0; radius=3.0;}};
+    ] in
+  let enemies = [make_slime 55.0 0.0] in
+  make_level 202 "Two"
+    "Brrrr, its cold and slippery here"
+    (-25.0) 0.0 bodies enemies {health=6; time=6.0; shots=1}
+
 end
 
 

@@ -147,8 +147,9 @@ let draw_blocky_circle x y r ci co =
       int_of_float @@ (rand *. (float_of_int variance)) in
     let bound_rand upper seed value = min (max (value + (calc_random seed) - variance / 2) 0) upper in
     let h, s, v = Colorutils.hsv_of_rgb (r, g, b) in
-    let r, g, b = Colorutils.rgb_of_hsv (h, bound_rand 100 seed s, v) in
-    (r, g, b, a) in
+    let r', g', b' = Colorutils.rgb_of_hsv (h, bound_rand 99 seed s, v) in
+    Printf.printf "rgb[%d, %d, %d] -> hsv[%d, %d, %d] -> rgb[%d, %d, %d]\n%!" r g b h s v r' g' b';
+    (r', g', b', a) in
 
   List.init (2 * r) (fun i -> x - r + i * size)
   |> List.map (fun x -> List.init (2 * r) (fun i -> x, (y - r + i * size)))
