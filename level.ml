@@ -515,13 +515,13 @@ end
 module World3 = struct
 let () = (* Level 1 *)
   let bodies = [
-      {Body.surface=Body.Slippery; body={Body.pos=vc 0.0 0.0; mass=10000.0; radius=25.0;}};
+      {Body.surface=Body.Slippery; body={Body.pos=vc 0.0 0.0; mass=7000.0; radius=25.0;}};
       {Body.surface=Body.Normal; body={Body.pos=vc 60.0 0.0; mass=300.0; radius=5.0;}};
     ] in
   let enemies = [make_slime 55.0 0.0] in
   make_level 201 "One"
     "Brrrr, its cold and slippery here"
-    (-25.0) 0.0 bodies enemies {health=6; time=10.0; shots=1}
+    (-25.0) 0.0 bodies enemies {health=6; time=6.0; shots=1}
 
 end
 

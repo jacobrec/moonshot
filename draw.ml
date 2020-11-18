@@ -138,15 +138,28 @@ let draw_blocky_circle x y r ci co =
     lerp r1 r2 x, lerp g1 g2 x, lerp b1 b2 x, lerp a1 a2 x in
 
   let tuple_color (r, g, b, a) = Color.create r g b a in
+  let shake_color seed (r, g, b, a) =
+    let seed = seed + r + g + b in
+    let variance = 10 in
+    let calc_random x =
+      let fx = float_of_int x in
+      let rand = Noise.get fx in
+      int_of_float @@ (rand *. (float_of_int variance)) in
+    let bound_rand upper seed value = min (max (value + (calc_random seed) - variance / 2) 0) upper in
+    let h, s, v = Colorutils.hsv_of_rgb (r, g, b) in
+    let r, g, b = Colorutils.rgb_of_hsv (h, bound_rand 100 seed s, v) in
+    (r, g, b, a) in
 
   List.init (2 * r) (fun i -> x - r + i * size)
   |> List.map (fun x -> List.init (2 * r) (fun i -> x, (y - r + i * size)))
   |> List.flatten
-  |> List.filter (fun (px, py) -> square (py - y + size/2) + square (px - x + size/2) < int_of_float (rf *. rf))
+  |> List.filter (fun (px, py) -> square (py - y + size/2) + square (px - x + size/2) <
+                                    int_of_float (rf *. rf))
   |> List.map (fun (px, py) -> let d2 = square (py - y + size/2) + square (px - x + size/2) in
                                let d = Float.sqrt (float_of_int d2) in
                                let p = d /. rf in
-                                 px, py, lerp_color ci co p)
+                               let shake_seed = ((px + py * 2 * r + (x + y * 10000) * 1000000)* 10) in
+                                 px, py, shake_color shake_seed @@ lerp_color ci co p)
   |> List.iter (fun (x, y, c) -> draw_rectangle x y size size (tuple_color c)) ;
 
   let ci = tuple_color ci in
