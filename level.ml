@@ -41,29 +41,29 @@ open Moonshot
  * 2-11) ???
  * 2-12) ???
  *
- * World 3: ???
- * Introduce ???
- * 2-1) ???
- * 2-2) ???
- * 2-3) ???
- * 2-4) ???
- * 2-5) ???
- * 2-6) ???
- * 2-7) ???
- * 2-8) ???
- * 2-9) ???
- * 2-10) ???
- * 2-11) ???
- * 2-12) ???
+ * World 3: Hawth: The icy world
+ * Introduce icy planets, fire shot powerup, icy enemies
+ * 3-1) Slippin
+ * 3-2) ???
+ * 3-3) ???
+ * 3-4) ???
+ * 3-5) ???
+ * 3-6) ???
+ * 3-7) ???
+ * 3-8) ???
+ * 3-9) ???
+ * 3-10) ???
+ * 3-11) ???
+ * 3-12) ???
 *)
 
 let vc = Raylib.Vector2.create
 
 let level_map = Hashtbl.create 24
-let avaliable_worlds = 2
 let world_names = [
     "Getting Started";
-    "Strange new worlds"
+    "Strange new worlds";
+    "Hawth: The icy world"
   ]
 
 let make_slime x y =
@@ -487,9 +487,6 @@ let () = (* Level 11 *)
     "Do or do not, there is no try. --Yoda"
     (105.0) (0.0) bodies enemies {health=6; time=20.0; shots=4}
 
-
-
-
 let () = (* Level 12 *)
   let bodies = [
       {Body.surface=Body.Sticky; body={Body.pos=vc 0.0 0.0; mass=150.0; radius=1.0;}};
@@ -513,6 +510,18 @@ let () = (* Level 12 *)
   make_level 112 "Twelve"
     "Ahh, they're attacking back. Careful not to blow yourself up"
     (0.0) 1.0 bodies enemies {health=6; time=15.0; shots=7}
+end
+
+module World3 = struct
+let () = (* Level 1 *)
+  let bodies = [
+      {Body.surface=Body.Slippery; body={Body.pos=vc 0.0 0.0; mass=10000.0; radius=25.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 60.0 0.0; mass=300.0; radius=5.0;}};
+    ] in
+  let enemies = [make_slime 55.0 0.0] in
+  make_level 201 "One"
+    "Brrrr, its cold and slippery here"
+    (-25.0) 0.0 bodies enemies {health=6; time=10.0; shots=1}
 
 end
 

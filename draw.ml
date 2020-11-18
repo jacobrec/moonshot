@@ -122,7 +122,7 @@ let draw_player ani pfeet phead =
   if Moonshot.debug_draw then
     List.iter (draw_body Color.lime) @@ List.map (fun x -> x.body) [phead; pfeet]
 
-let draw_blocky_planet x y r ci co =
+let draw_blocky_circle x y r ci co =
   let rf = r in
   let r = int_of_float r in
   let size = sofw 0.5 in
@@ -176,9 +176,10 @@ let draw_planet p =
     | Body.Bouncy -> color, color_create 255 255 255 255 (* white *)
     | Body.Painful -> color, color_create 230 41 55 255 (* red *)
     | Body.Sticky  -> color, color_create 255 109 194 255 (* pink *)
+    | Body.Slippery  -> color, color_create 102 191 255 255 (* lightblue *)
     | Body.Normal when density < 0.0 -> color_create 0 0 0 0 (* blank *), color
     | Body.Normal  -> color, color in
-  draw_blocky_planet px py pr color_inner color_outer
+  draw_blocky_circle px py pr color_inner color_outer
 
 let measure_text_wh text size =
   let f = get_font_default () in
@@ -471,7 +472,7 @@ let draw_worldselect _ =
       ldl ~centered:false (Printf.sprintf "[%s] World %d: %s" (List.nth keys (level-1)) level
                          (List.nth Level.world_names (level - 1))
         );
-    ) (List.init Level.avaliable_worlds (fun i -> i+1));
+    ) (List.init (List.length Level.world_names) (fun i -> i+1));
   end_drawing ();
   Model.WorldSelect
 

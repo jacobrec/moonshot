@@ -78,9 +78,13 @@ let update_planet_collidable ?(inp=None) ?(slipping=false) ?(no_forces=false) de
   let open Moonshot.Body in
 
   let b = base in
-  let b' = (match List.find_opt (fun b2 -> bodies_touch b.body b2) bodies with
-            | None -> b
+  let (b_fx, b_fy) = gravity_from_many b.body bodies in
+  let b', fx, fy = (match List.find_opt (fun b2 -> bodies_touch b.body b2) bodies with
+            | None -> b, b_fx, b_fy
             | Some planet ->
+               let input_force = 500.0 in
+               let jump_impulse = 150.0 in
+
                let (vx, vy) = vector b.vel in
 
                let normal_dir = angle_from_vectors b.body.pos planet.pos in
@@ -88,26 +92,35 @@ let update_planet_collidable ?(inp=None) ?(slipping=false) ?(no_forces=false) de
                let rotate_back = rotate @@ -. normal_dir in
 
                let (vpar, vper) = rotate_forward (vx, vy) in
+               let (fpar, fper) = rotate_forward (b_fx, b_fy) in
                let vpar_jump = -0.5 *. vpar in
                let vpar = 0.0 in
 
+               let delta_v_of_impulse f = f /. base.body.mass in
                (* TODO: player controls *)
-               let input_force = 20.0 in
-               let jump_force = 18.0 in
-               let (vpar, vper) = match inp with
-                 | None -> (vpar, vper)
+               let (vpar, fper) = match inp with
+                 | None -> (vpar, fper)
                  | Some inp ->
                     match inp with
-                    | Moonshot.Player.CW -> (vpar, vper +. input_force)
-                    | Moonshot.Player.CCW -> (vpar, vper -. input_force)
-                    | Moonshot.Player.Jump -> (vpar_jump -. jump_force, vper)
-                    | _ -> (vpar, vper)
+                    | Moonshot.Player.CW -> (vpar, fper +. input_force)
+                    | Moonshot.Player.CCW -> (vpar, fper -. input_force)
+                    | Moonshot.Player.Jump -> (vpar_jump -. delta_v_of_impulse jump_impulse, fper)
+                    | _ -> (vpar, fper)
                in
 
                (* Friction *)
-               let friction = if slipping then 1.0 else 0.50 in
-               let vper = friction *. vper in
-               let vper = if (Float.abs vper) < 2.0 then 0.0 else vper in
+               let friction_coeffient = if slipping then 0.005 else 0.70 in
+               let ff = fpar *. friction_coeffient in
+               let ff = Float.copy_sign ff (-.vper) in
+               let fper = ff +. fper in
+
+               (* Air resistance *)
+               let drag_coeffiecent = 0.5 in
+               let nsign x = if Float.sign_bit x then 1.0 else -1.0 in
+               let dper = (nsign vper) *. vper *. vper *. drag_coeffiecent in
+               let dpar = (nsign vpar) *. vpar *. vpar *. drag_coeffiecent in
+               let fpar = fpar +. dpar in
+               let fper = fper +. dper in
 
                let (new_vx, new_vy) = rotate_back (vpar, vper) in
 
@@ -121,35 +134,37 @@ let update_planet_collidable ?(inp=None) ?(slipping=false) ?(no_forces=false) de
 
                let pos = Vector2.create new_x new_y in
                let vel = Vector2.create new_vx new_vy in
-               {vel; body={b.body with pos}}) in
+               let fx, fy = rotate_back (fpar, fper) in
+
+               {vel; body={b.body with pos}}, fx, fy) in
 
   (* Calculate forces *)
-  let (b_fx, b_fy) = gravity_from_many b'.body bodies in
-  let (b_accx, b_accy) = (b_fx /. b'.body.mass, b_fy /. b'.body.mass) in
+  let (b_accx, b_accy) = (fx /. b'.body.mass, fy /. b'.body.mass) in
   let b'' = accelerate_moving_body delta b' (b_accx, b_accy) in
 
 
   let b''' = if no_forces then b' else b'' in
-  (b''', (b_fx, b_fy))
+  (b''', (b_fx, b_fy)) (* don't include friction in return [for calculating standing angle] *)
 
 let update_player delta bodies static fading player =
   let {Moonshot.Player.head=float; feet=base; input; health; last_damaged_at; _} = player in
   (* player is like a balloon attached to a rock at a fixed distance *)
   let open Moonshot.Body in
+   let on_planet_type t =
+     let planets = List.filter (fun x -> x.surface = t) static in
+     List.exists (fun b2 -> ignore (b2.surface); bodies_touch base.body b2.body) planets in
 
-  let ouchies = List.filter (fun x -> x.surface = Painful) static in
-  let touching_ouchy_planets = List.exists (fun b2 -> ignore (b2.surface); bodies_touch base.body b2.body) ouchies in
-  let stickies = List.filter (fun x -> x.surface = Sticky) static in
-  let touching_sticky_planets = List.exists (fun b2 -> ignore (b2.surface); bodies_touch base.body b2.body) stickies in
-  let bouncies = List.filter (fun x -> x.surface = Bouncy) static in
-  let touching_bouncy_planet = List.exists (fun b2 -> ignore (b2.surface); bodies_touch base.body b2.body) bouncies in
+  let touching_ouchy_planets = on_planet_type Painful in
+  let touching_sticky_planets = on_planet_type Sticky in
+  let touching_bouncy_planets = on_planet_type Bouncy in
+  let touching_icy_planets = on_planet_type Slippery in
   let touching_a_planet = List.exists (fun b2 -> ignore (b2.surface); bodies_touch base.body b2.body) static in
   let in_any_explosion = List.exists (fun b2 -> ignore(b2.remaining);
                                                    bodies_touch base.body b2.body) fading in
   let damaged = (in_any_explosion || touching_ouchy_planets) &&
                   (last_damaged_at +. Moonshot.damage_cooldown < get_time ()) in
   let health = if damaged then health - 1 else health in
-  let input = if damaged || touching_bouncy_planet then Player.Jump else input in
+  let input = if damaged || touching_bouncy_planets then Player.Jump else input in
   let last_damaged_at = if damaged then get_time () else last_damaged_at in
   let animation_state = if not touching_a_planet then Player.Falling
                         else if input = Player.CW then Player.WalkingReverse
@@ -157,7 +172,8 @@ let update_player delta bodies static fading player =
                         else Player.Standing in
 
   (* Calculate new base *)
-  let (new_b, (b_fx, b_fy)) = update_planet_collidable ~inp:(Some input) delta bodies base in
+  let (new_b, (b_fx, b_fy)) = update_planet_collidable ~slipping:touching_icy_planets
+                                ~inp:(Some input) delta bodies base in
   let new_f = float in
   let new_b = if not touching_sticky_planets then new_b else base in
 
