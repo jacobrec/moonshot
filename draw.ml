@@ -44,7 +44,7 @@ let draw_dotted_line color max_length x1 y1 x2 y2 =
 let draw_aim_assist static dots freq ax ay player =
   let open Moonshot.Player in
   let open Moonshot.Body in
-  let (bouncy, not_bouncy) = List.partition (fun x -> ignore (x.surface = Body.Bouncy); false) static in
+  let (bouncy, not_bouncy) = List.partition (fun x -> x.surface = Body.Bouncy) static in
   let bodies = List.map (fun x -> ignore (x.surface); x.body) static in
   let is_in_bouncy b =
     List.find_opt (fun x -> ignore (x.surface); Update.bodies_touch x.body b) bouncy in

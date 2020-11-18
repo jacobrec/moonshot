@@ -82,7 +82,7 @@ let update_planet_collidable ?(inp=None) ?(slipping=false) ?(no_forces=false) de
   let b', fx, fy = (match List.find_opt (fun b2 -> bodies_touch b.body b2) bodies with
             | None -> b, b_fx, b_fy
             | Some planet ->
-               let input_force = 500.0 in
+               let input_force = 1000.0 in
                let jump_impulse = 150.0 in
 
                let (vx, vy) = vector b.vel in
@@ -109,13 +109,13 @@ let update_planet_collidable ?(inp=None) ?(slipping=false) ?(no_forces=false) de
                in
 
                (* Friction *)
-               let friction_coeffient = if slipping then 0.005 else 0.70 in
+               let friction_coeffient = if slipping then 0.005 else 0.30 in
                let ff = fpar *. friction_coeffient in
                let ff = Float.copy_sign ff (-.vper) in
                let fper = ff +. fper in
 
                (* Air resistance *)
-               let drag_coeffiecent = 0.5 in
+               let drag_coeffiecent = 1.0 in
                let nsign x = if Float.sign_bit x then 1.0 else -1.0 in
                let dper = (nsign vper) *. vper *. vper *. drag_coeffiecent in
                let dpar = (nsign vpar) *. vpar *. vpar *. drag_coeffiecent in

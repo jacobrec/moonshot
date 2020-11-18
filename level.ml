@@ -162,17 +162,17 @@ module World1 = struct
     let enemies = [make_slime (130.0) (110.0)] in
     make_level 4 "Four"
       "Different planets have different densities. More mass means more gravity."
-      (-15.0) 0.0 bodies enemies {health=6; time=15.0; shots=1}
+      (-15.0) 0.0 bodies enemies {health=6; time=20.0; shots=1}
 
   let () = (* Level 5 *)
     let radii = 20.0 in
     let x theta = radii *. Float.cos theta in
     let y theta = radii *. Float.sin theta in
     let bodies = [
-        {Body.surface=Body.Normal; body={Body.pos=vc  (x 0.0) (y 0.0); mass=600.0;  radius=7.0;}};
+        {Body.surface=Body.Normal; body={Body.pos=vc  (x 0.0) (y 0.0); mass=400.0;  radius=7.0;}};
         {Body.surface=Body.Normal; body={Body.pos=vc  (x 2.1) (y 2.1); mass=600.0;  radius=7.0;}};
         {Body.surface=Body.Normal; body={Body.pos=vc  (x 4.2) (y 4.2); mass=600.0;  radius=7.0;}};
-        {Body.surface=Body.Normal; body={Body.pos=vc  (-40.0) 0.0;     mass=600.0; radius=8.0;}};
+        {Body.surface=Body.Normal; body={Body.pos=vc  (-40.0) 0.0;     mass=800.0; radius=8.0;}};
         {Body.surface=Body.Normal; body={Body.pos=vc  (-60.0) 5.0;    mass=300.0; radius=4.0;}};
         {Body.surface=Body.Normal; body={Body.pos=vc  (-70.0) (-5.0); mass=300.0; radius=4.0;}};
         {Body.surface=Body.Normal; body={Body.pos=vc  (-80.0) 5.0;  mass=300.0; radius=4.0;}};
@@ -188,10 +188,10 @@ module World1 = struct
     let x theta = radii *. Float.cos theta in
     let y theta = radii *. Float.sin theta in
     let bodies = [
-        {Body.surface=Body.Normal; body={Body.pos=vc  (x 0.0) (y 0.0); mass=600.0;  radius=7.0;}};
+        {Body.surface=Body.Normal; body={Body.pos=vc  (x 0.0) (y 0.0); mass=400.0;  radius=7.0;}};
         {Body.surface=Body.Painful; body={Body.pos=vc  (x 2.1) (y 2.1); mass=600.0;  radius=7.0;}};
         {Body.surface=Body.Painful; body={Body.pos=vc  (x 4.2) (y 4.2); mass=600.0;  radius=7.0;}};
-        {Body.surface=Body.Normal; body={Body.pos=vc  (-40.0) 0.0; mass=600.0;  radius=8.0;}};
+        {Body.surface=Body.Normal; body={Body.pos=vc  (-40.0) 0.0;     mass=800.0; radius=8.0;}};
 
         {Body.surface=Body.Normal; body={Body.pos=vc  (-60.0) 5.0; mass=300.0;  radius=4.0;}};
         {Body.surface=Body.Normal; body={Body.pos=vc  (-70.0) (-5.0); mass=300.0;  radius=4.0;}};
@@ -221,7 +221,7 @@ module World1 = struct
         {Body.surface=Body.Normal; body={Body.pos=vc 50.0 0.0; mass=100.0;  radius=2.0;}};
         {Body.surface=Body.Normal; body={Body.pos=vc 20.0 (-10.0); mass=100.0;  radius=10.0;}};
       ] in
-    let enemies = [make_slime (50.0) (-2.0)] in
+    let enemies = [make_slime (45.0) (0.0)] in
     make_level 8 "Eight"
       "Some celetial bodies are extremely dense. You can restart the level through the pause menu (press p)"
       6.0 0.0 bodies enemies {health=6; time=8.0; shots=1}
@@ -283,7 +283,7 @@ module World1 = struct
     let enemies = [make_slime 30.0 (-6.0)] in
     make_level 11 "Eleven"
       "Think fast!"
-      (-30.0) 0.0 bodies enemies {health=5; time=3.0; shots=1}
+      (-50.0) 0.0 bodies enemies {health=4; time=5.0; shots=1}
 
   let () = (* Level 12 *)
     let x r theta = r *. Float.cos theta in
@@ -429,7 +429,7 @@ let () = (* Level 9 *)
 
   make_level 109 "Nine"
     "Caution low gravity zone. It'll be hard to curve shots here"
-    (0.0) (10.0) bodies enemies {health=6; time=5.0; shots=1}
+    (0.0) (10.0) bodies enemies {health=6; time=7.0; shots=1}
 
 let () = (* Level 10 *)
   let bodies = [
@@ -437,10 +437,10 @@ let () = (* Level 10 *)
       {Body.surface=Body.Normal; body={Body.pos=vc 85.0 (-6.0); mass= -300.0; radius=3.0;}};
       {Body.surface=Body.Normal; body={Body.pos=vc 70.0 0.0; mass=500.0; radius=7.0;}};
       {Body.surface=Body.Normal; body={Body.pos=vc 55.0 (-6.0); mass= -300.0; radius=3.0;}};
-      {Body.surface=Body.Sticky; body={Body.pos=vc 40.0 0.0; mass=800.0; radius=7.0;}};
-      {Body.surface=Body.Normal; body={Body.pos=vc 45.0 (-7.5); mass= -100.0; radius=2.0;}};
-      {Body.surface=Body.Normal; body={Body.pos=vc 40.0 (-9.0); mass= -100.0; radius=2.0;}};
-      {Body.surface=Body.Normal; body={Body.pos=vc 35.0 (-7.5); mass= -100.0; radius=2.0;}};
+      {Body.surface=Body.Sticky; body={Body.pos=vc 40.0 0.0; mass=1000.0; radius=8.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 45.0 (-9.5); mass= -100.0; radius=2.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 40.0 (-10.0); mass= -100.0; radius=2.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 35.0 (-9.5); mass= -100.0; radius=2.0;}};
 
       {Body.surface=Body.Normal; body={Body.pos=vc 0.0 20.0; mass=10.0; radius=7.0;}};
       {Body.surface=Body.Normal; body={Body.pos=vc 0.0 (-20.0); mass=100.0; radius=7.0;}};
