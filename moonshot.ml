@@ -124,7 +124,7 @@ module Model = struct
     | StatsScreen of (int * int Option.t) Option.t
 end
 
-let ssize = 175
+let ssize = 75
 let screen_width = 16 * ssize
 let screen_height = 9 * ssize
 let font_size = ssize * 12 / 65

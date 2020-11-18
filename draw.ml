@@ -122,6 +122,36 @@ let draw_player ani pfeet phead =
   if Moonshot.debug_draw then
     List.iter (draw_body Color.lime) @@ List.map (fun x -> x.body) [phead; pfeet]
 
+let draw_blocky_planet x y r ci co =
+  let rf = r in
+  let r = int_of_float r in
+  let size = sofw 0.5 in
+  let square x = x * x in
+
+  let lerp a b x =
+    a + (int_of_float (float_of_int (b - a) *. x)) in
+  let lerp_color c1 c2 x =
+    let steps = 100 in
+    let x = float_of_int ((int_of_float (x *. (float_of_int steps)))) /. (float_of_int steps) in
+    let (r1, g1, b1, a1) = c1 in
+    let (r2, g2, b2, a2) = c2 in
+    lerp r1 r2 x, lerp g1 g2 x, lerp b1 b2 x, lerp a1 a2 x in
+
+  let tuple_color (r, g, b, a) = Color.create r g b a in
+
+  List.init (2 * r) (fun i -> x - r + i * size)
+  |> List.map (fun x -> List.init (2 * r) (fun i -> x, (y - r + i * size)))
+  |> List.flatten
+  |> List.filter (fun (px, py) -> square (py - y + size/2) + square (px - x + size/2) < int_of_float (rf *. rf))
+  |> List.map (fun (px, py) -> let d2 = square (py - y + size/2) + square (px - x + size/2) in
+                               let d = Float.sqrt (float_of_int d2) in
+                               let p = d /. rf in
+                                 px, py, lerp_color ci co p)
+  |> List.iter (fun (x, y, c) -> draw_rectangle x y size size (tuple_color c)) ;
+
+  let ci = tuple_color ci in
+  let co = tuple_color co in
+  if Moonshot.debug_draw then draw_circle_gradient x y rf ci co
 
 let draw_planet p =
   let open Body in
@@ -129,23 +159,26 @@ let draw_planet p =
   let p = p.body in
   let density = p.mass /. (p.radius *. p.radius) in
   let adensity = Float.abs (p.mass /. (p.radius *. p.radius)) in
+  let color_create r g b a = (r, g, b, a) in
   let color =
-    if adensity > 30.0 then Color.create 40 10 75 255
-    else if adensity > 25.0 then Color.darkgray
-    else if adensity > 20.0 then Color.brown
-    else if adensity > 15.0 then Color.gray
-    else if adensity > 10.0 then Color.gold
-    else if adensity > 5.0 then Color.beige
-    else Color.lightgray in
+    if adensity > 30.0 then color_create 40 10 75 255 (* dark purple *)
+    else if adensity > 25.0 then color_create 80 80 80 255 (* darkgray *)
+    else if adensity > 20.0 then color_create 127 106 79 255 (* brown *)
+    else if adensity > 15.0 then color_create 130 130 130 255 (* gray *)
+    else if adensity > 10.0 then color_create 255 203 0 255 (* gold *)
+    else if adensity > 5.0 then color_create 211 176 131 255 (* beige *)
+    else color_create 200 200 200 255 (* lightgray *) in
   let r = p.radius in
   let (px, py) = sofwv p.pos in
   let pr = float_of_int @@ sofw r in
-  match surface with
-  | Body.Bouncy -> draw_circle_gradient px py pr color Color.white
-  | Body.Painful -> draw_circle_gradient px py pr color Color.red
-  | Body.Sticky  -> draw_circle_gradient px py pr color Color.pink
-  | Body.Normal when density < 0.0 -> draw_circle_gradient px py pr Color.blank color
-  | Body.Normal  -> draw_circle px py pr color
+  let color_inner, color_outer =
+    match surface with
+    | Body.Bouncy -> color, color_create 255 255 255 255 (* white *)
+    | Body.Painful -> color, color_create 230 41 55 255 (* red *)
+    | Body.Sticky  -> color, color_create 255 109 194 255 (* pink *)
+    | Body.Normal when density < 0.0 -> color_create 0 0 0 0 (* blank *), color
+    | Body.Normal  -> color, color in
+  draw_blocky_planet px py pr color_inner color_outer
 
 let measure_text_wh text size =
   let f = get_font_default () in
