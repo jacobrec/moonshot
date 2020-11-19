@@ -534,7 +534,7 @@ let () = (* Level 2 *)
     ] in
   let enemies = [make_slime 80.0 30.0; make_slime (-27.0) 30.0] in
   make_level 202 "Two"
-    "Brrrr, its cold and slippery here"
+    "Careful you don't slip into a sticky situation"
     (100.0) 30.0 bodies enemies {health=6; time=10.0; shots=2}
 
 let () = (* Level 3 *)
@@ -551,6 +551,23 @@ let () = (* Level 3 *)
   make_level 203 "Three"
     "Brrrr, its cold and slippery here"
     (100.0) 30.0 bodies enemies {health=6; time=20.0; shots=3}
+
+let () = (* Level 4 *)
+  let bodies = [
+      {Body.surface=Body.Slippery; body={Body.pos=vc 90.0 30.0; mass=550.0; radius=3.0;}};
+      {Body.surface=Body.Normal;   body={Body.pos=vc 80.0 30.0; mass=150.0; radius=3.0;}};
+      {Body.surface=Body.Normal;   body={Body.pos=vc 90.0 20.0; mass=150.0; radius=3.0;}};
+      {Body.surface=Body.Normal;   body={Body.pos=vc 100.0 30.0; mass=150.0; radius=3.0;}};
+
+      {Body.surface=Body.Slippery; body={Body.pos=vc 90.0 60.0; mass=450.0; radius=3.0;}};
+      {Body.surface=Body.Normal;   body={Body.pos=vc 80.0 60.0; mass=250.0; radius=3.0;}};
+      {Body.surface=Body.Normal;   body={Body.pos=vc 100.0 60.0; mass=250.0; radius=3.0;}};
+    ] in
+  let enemies = [make_slime 8000.0 30.0;
+                 make_slime (500.0) 35.0] in
+  make_level 204 "Four"
+    "Ice is slippery, if you go to fast, you may lose your footing"
+    (93.0) 30.0 bodies enemies {health=6; time=20.0; shots=3}
 
 end
 
