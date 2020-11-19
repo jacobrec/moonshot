@@ -535,7 +535,22 @@ let () = (* Level 2 *)
   let enemies = [make_slime 80.0 30.0; make_slime (-27.0) 30.0] in
   make_level 202 "Two"
     "Brrrr, its cold and slippery here"
-    (100.0) 30.0 bodies enemies {health=6; time=00.0; shots=2}
+    (100.0) 30.0 bodies enemies {health=6; time=10.0; shots=2}
+
+let () = (* Level 3 *)
+  let bodies = [
+      {Body.surface=Body.Slippery; body={Body.pos=vc 90.0 30.0; mass=1200.0; radius=10.0;}};
+      {Body.surface=Body.Sticky; body={Body.pos=vc 60.0 20.0; mass=800.0; radius=7.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 10.0 (-15.0); mass=700.0; radius=4.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 20.0 10.0; mass= -200.0; radius=3.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 10.0 (35.0); mass=700.0; radius=4.0;}};
+    ] in
+  let enemies = [make_slime 80.0 30.0;
+                 make_slime (5.0) (-15.0);
+                 make_slime (5.0) 35.0] in
+  make_level 203 "Three"
+    "Brrrr, its cold and slippery here"
+    (100.0) 30.0 bodies enemies {health=6; time=20.0; shots=3}
 
 end
 
