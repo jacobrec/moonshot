@@ -1,6 +1,22 @@
 open Raylib
 
 let debug_draw = false
+let true_draw = true
+
+let damage_cooldown = 0.31
+let explosion_time = 0.3
+let explosion_mass = -100.0
+let explosion_radius = 3.0
+
+let aim_assist_dots = 50
+
+let ssize = 75
+let screen_width = 16 * ssize
+let screen_height = 9 * ssize
+let font_size = ssize * 12 / 65
+
+let pixels_per_meter = float_of_int ssize /. 10.0
+let meters_per_pixel = 1.0 /. pixels_per_meter
 
 module Body = struct
   type surface_type =
@@ -125,13 +141,6 @@ module Model = struct
     | StatsScreen of (int * int Option.t) Option.t
 end
 
-let ssize = 75
-let screen_width = 16 * ssize
-let screen_height = 9 * ssize
-let font_size = ssize * 12 / 65
-
-let pixels_per_meter = float_of_int ssize /. 10.0
-let meters_per_pixel = 1.0 /. pixels_per_meter
 
 let vector v =
   (Vector2.x v, Vector2.y v)
@@ -163,9 +172,3 @@ let wofsv = world_of_screen_vector
 let sofwv_v v = let (x, y) = screen_of_world_vector v in
               Vector2.create (float_of_int x) (float_of_int y)
 
-let damage_cooldown = 0.51
-let explosion_time = 0.5
-let explosion_mass = -100.0
-let explosion_radius = 3.0
-
-let aim_assist_dots = 50

@@ -81,7 +81,7 @@ let draw_texture text wloc ang size =
   let p = Vector2.create (px -. (p_off *. Float.cos ang) +. p_off *. Float.sin ang)
             (py +. (p_off *. Float.sin ang) +. p_off *. Float.cos ang) in
 
-  draw_texture_ex text p p_ang sf Color.white
+  if Moonshot.true_draw then draw_texture_ex text p p_ang sf Color.white
 
 let draw_texture_hud text wloc size =
   let psize = size in
@@ -92,8 +92,7 @@ let draw_texture_hud text wloc size =
   let p_off = (float_of_int tsize *. sf) /. 2.0 in
   let p = Vector2.create (px -. p_off) (py -. p_off) in
 
-
-  draw_texture_ex text p 0.0 sf Color.white
+  if Moonshot.true_draw then draw_texture_ex text p 0.0 sf Color.white
 
 let draw_enemy e =
   let open Moonshot.Enemy in
@@ -148,20 +147,20 @@ let draw_blocky_circle x y r ci co =
     let bound_rand upper seed value = min (max (value + (calc_random seed) - variance / 2) 0) upper in
     let h, s, v = Colorutils.hsv_of_rgb (r, g, b) in
     let r', g', b' = Colorutils.rgb_of_hsv (h, bound_rand 99 seed s, v) in
-    Printf.printf "rgb[%d, %d, %d] -> hsv[%d, %d, %d] -> rgb[%d, %d, %d]\n%!" r g b h s v r' g' b';
     (r', g', b', a) in
 
-  List.init (2 * r) (fun i -> x - r + i * size)
-  |> List.map (fun x -> List.init (2 * r) (fun i -> x, (y - r + i * size)))
-  |> List.flatten
-  |> List.filter (fun (px, py) -> square (py - y + size/2) + square (px - x + size/2) <
-                                    int_of_float (rf *. rf))
-  |> List.map (fun (px, py) -> let d2 = square (py - y + size/2) + square (px - x + size/2) in
-                               let d = Float.sqrt (float_of_int d2) in
-                               let p = d /. rf in
-                               let shake_seed = ((px + py * 2 * r + (x + y * 10000) * 1000000)* 10) in
+  if Moonshot.true_draw then
+    List.init (2 * r) (fun i -> x - r + i * size)
+    |> List.map (fun x -> List.init (2 * r) (fun i -> x, (y - r + i * size)))
+    |> List.flatten
+    |> List.filter (fun (px, py) -> square (py - y + size/2) + square (px - x + size/2) <
+                                      int_of_float (rf *. rf))
+    |> List.map (fun (px, py) -> let d2 = square (py - y + size/2) + square (px - x + size/2) in
+                                 let d = Float.sqrt (float_of_int d2) in
+                                 let p = d /. rf in
+                                 let shake_seed = ((px + py * 2 * r + (x + y * 10000) * 1000000)* 10) in
                                  px, py, shake_color shake_seed @@ lerp_color ci co p)
-  |> List.iter (fun (x, y, c) -> draw_rectangle x y size size (tuple_color c)) ;
+    |> List.iter (fun (x, y, c) -> draw_rectangle x y size size (tuple_color c)) ;
 
   let ci = tuple_color ci in
   let co = tuple_color co in
