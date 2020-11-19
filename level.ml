@@ -433,11 +433,11 @@ let () = (* Level 9 *)
 
 let () = (* Level 10 *)
   let bodies = [
-      {Body.surface=Body.Normal; body={Body.pos=vc 100.0 0.0; mass=300.0; radius=7.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 100.0 0.0; mass=350.0; radius=7.0;}};
       {Body.surface=Body.Normal; body={Body.pos=vc 85.0 (-6.0); mass= -300.0; radius=3.0;}};
       {Body.surface=Body.Normal; body={Body.pos=vc 70.0 0.0; mass=500.0; radius=7.0;}};
       {Body.surface=Body.Normal; body={Body.pos=vc 55.0 (-6.0); mass= -300.0; radius=3.0;}};
-      {Body.surface=Body.Sticky; body={Body.pos=vc 40.0 0.0; mass=1000.0; radius=8.0;}};
+      {Body.surface=Body.Sticky; body={Body.pos=vc 40.0 0.0; mass=800.0; radius=8.0;}};
       {Body.surface=Body.Normal; body={Body.pos=vc 45.0 (-9.5); mass= -100.0; radius=2.0;}};
       {Body.surface=Body.Normal; body={Body.pos=vc 40.0 (-10.0); mass= -100.0; radius=2.0;}};
       {Body.surface=Body.Normal; body={Body.pos=vc 35.0 (-9.5); mass= -100.0; radius=2.0;}};
