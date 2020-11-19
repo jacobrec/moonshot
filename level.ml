@@ -70,7 +70,7 @@ let make_slime x y =
   {Enemy.loc={Body.body={Body.pos=vc x y; mass=1.0; radius=1.0;};
               vel=vc 0.0 0.0}; action=Standing; angle=0.0}
 
-let make_level id name start_text px py bodies enemies star_reqs =
+let make_level ?(powerups=[]) id name start_text px py bodies enemies star_reqs =
   let movables = [] in
   let cam = Raylib.Camera2D.create (vc (float_of_int (screen_width / 2)) (float_of_int (screen_height / 2)))
               (vc 0.0 0.0) 0.0 1.0 in (* offset target rotation zoom *)
@@ -94,6 +94,8 @@ let make_level id name start_text px py bodies enemies star_reqs =
                 fading=[];
                 enemies;
                 cam;
+                powerups;
+                special_shots=[];
                 player=make_player px py;
                 runtime=0.0;
                 shots_taken=0;
@@ -554,20 +556,42 @@ let () = (* Level 3 *)
 
 let () = (* Level 4 *)
   let bodies = [
-      {Body.surface=Body.Slippery; body={Body.pos=vc 90.0 30.0; mass=550.0; radius=3.0;}};
-      {Body.surface=Body.Normal;   body={Body.pos=vc 80.0 30.0; mass=150.0; radius=3.0;}};
-      {Body.surface=Body.Normal;   body={Body.pos=vc 90.0 20.0; mass=150.0; radius=3.0;}};
-      {Body.surface=Body.Normal;   body={Body.pos=vc 100.0 30.0; mass=150.0; radius=3.0;}};
-
-      {Body.surface=Body.Slippery; body={Body.pos=vc 90.0 60.0; mass=450.0; radius=3.0;}};
-      {Body.surface=Body.Normal;   body={Body.pos=vc 80.0 60.0; mass=250.0; radius=3.0;}};
-      {Body.surface=Body.Normal;   body={Body.pos=vc 100.0 60.0; mass=250.0; radius=3.0;}};
+      {Body.surface=Body.Slippery; body={Body.pos=vc 90.0 30.0; mass=550.0; radius=5.0;}};
+      {Body.surface=Body.Bouncy; body={Body.pos=vc 60.0 30.0; mass=850.0; radius=15.0;}};
     ] in
-  let enemies = [make_slime 8000.0 30.0;
-                 make_slime (500.0) 35.0] in
-  make_level 204 "Four"
+  let enemies = [make_slime 45.0 30.0] in
+  let powerups = [
+      {Powerup.power=Powerup.Fireblast; pos=vc 90.0 37.0};
+    ] in
+  make_level 204 "Four" ~powerups
+    "Ahhh! I'm out of control! If only there was some powerup that could cause the next shot to melt an icy planet"
+    (93.0) 30.0 bodies enemies {health=6; time=10.0; shots=2}
+
+
+let () = (* Level 5 *)
+  let bodies = [
+      {Body.surface=Body.Slippery; body={Body.pos=vc 90.0 30.0; mass=550.0; radius=5.0;}};
+      {Body.surface=Body.Normal;   body={Body.pos=vc 75.0 30.0; mass=150.0; radius=3.0;}};
+      {Body.surface=Body.Normal;   body={Body.pos=vc 90.0 10.0; mass=150.0; radius=3.0;}};
+      {Body.surface=Body.Normal;   body={Body.pos=vc 105.0 30.0; mass=150.0; radius=3.0;}};
+
+      {Body.surface=Body.Slippery; body={Body.pos=vc 90.0 60.0; mass=450.0; radius=5.0;}};
+      {Body.surface=Body.Sticky;   body={Body.pos=vc 75.0 60.0; mass=250.0; radius=3.0;}};
+      {Body.surface=Body.Sticky;   body={Body.pos=vc 105.0 60.0; mass=250.0; radius=3.0;}};
+
+      {Body.surface=Body.Normal;   body={Body.pos=vc 90.0 80.0; mass=550.0; radius=3.0;}};
+
+      {Body.surface=Body.Normal;   body={Body.pos=vc 90.0 105.0; mass=250.0; radius=1.0;}};
+      {Body.surface=Body.Normal;   body={Body.pos=vc 98.0 100.0; mass= -10.0; radius=3.0;}};
+      {Body.surface=Body.Normal;   body={Body.pos=vc 82.0 100.0; mass= -10.0; radius=3.0;}};
+    ] in
+  let enemies = [make_slime 90.0 108.0] in
+  let powerups = [
+      {Powerup.power=Powerup.Fireblast; pos=vc 90.0 55.0};
+    ] in
+  make_level 205 "Five" ~powerups
     "Ice is slippery, if you go to fast, you may lose your footing"
-    (93.0) 30.0 bodies enemies {health=6; time=20.0; shots=3}
+    (93.0) 30.0 bodies enemies {health=6; time=10.0; shots=2}
 
 end
 

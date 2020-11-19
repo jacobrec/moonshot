@@ -194,19 +194,31 @@ let create_bullet_from_aim ax ay head =
    vel=vel}
 
 
-let create_player_bullets time player =
+let create_player_bullets special_shots time player =
   let open Moonshot.Player in
-  match player.input with
-  | Moonshot.Player.Fire (ax, ay) ->
-     [{Body.created_at=time; moving=create_bullet_from_aim ax ay player.head}]
-  | _ -> []
+   match player.input with
+   | Moonshot.Player.Fire (ax, ay) ->
+      let nl, kind = match special_shots with
+        | Powerup.Fireblast :: t -> t, Body.Fireblast
+        | _ -> [], Body.Normalblast in
+      nl, [{Body.created_at=time; kind; moving=create_bullet_from_aim ax ay player.head}]
+   | _ -> special_shots, []
 
 let explosion_from_body time x =
   let open Body in
   let t = time -. x.created_at in
+  let kind = x.kind in
   let x = x.moving in
-  (t, {remaining=Moonshot.explosion_time;
-       body={x.body with radius=Moonshot.explosion_radius; mass= Moonshot.explosion_mass}})
+  match kind with
+  | Normalblast ->
+     (t, {remaining=Moonshot.explosion_time;
+          explosion_kind=kind;
+          body={x.body with radius=Moonshot.explosion_radius; mass= Moonshot.explosion_mass}})
+  | Fireblast ->
+     (t, {remaining=Moonshot.explosion_time;
+          explosion_kind=kind;
+          body={x.body with radius=Moonshot.explosion_radius /. 2.0;
+                            mass= Moonshot.explosion_mass /. 4.0}})
 
 let elastic_collision body planet =
   let open Body in
@@ -303,10 +315,38 @@ let update_playing_check_for_level_end model =
      Model.LevelEnd le
   | None -> Model.Playing model
 
+let update_powerups player powerups =
+  let {Moonshot.Player.head=float; feet=base; _} = player in
+  let open Powerup in
+  let body_parts = [float; base] in
+  let touching_player p = List.exists (fun b ->
+                              let open Body in
+                              let s = draw_size p.power in
+                              check_collision_circles p.pos s b.body.pos b.body.radius)
+                            body_parts in
+  let a, b = List.partition touching_player powerups in
+  List.map (fun p -> p.power) a, b
+
+let update_planets static fading =
+  let open Body in
+  let explosion_body x = ignore (x.remaining); x.body in
+  let planet_body x = ignore (x.surface); x.body in
+  List.map (fun planet ->
+      (* Currently this onlys serves to see if planets should melt *)
+      let fading = List.filter (fun x -> x.explosion_kind = Body.Fireblast) fading in
+      if planet.surface = Slippery then
+        if List.exists (fun b ->
+               bodies_touch (explosion_body b) (planet_body planet)
+             ) fading then {planet with surface=Normal} else planet
+      else planet
+
+    ) static
+
+
 let update_playing delta model =
   let open Moonshot.Body in
   let { Moonshot.Model.bullets=bullets; static; fading; player;
-        enemies; cam; runtime; shots_taken; longest_bullet; _ } = model in
+        enemies; cam; runtime; shots_taken; longest_bullet; special_shots; powerups; _ } = model in
   let enemy_body x = let open Enemy in x.loc.body in
   let explosion_body x = ignore (x.remaining); x.body in
   let planet_body x = ignore (x.surface); x.body in
@@ -319,9 +359,10 @@ let update_playing delta model =
   in
   let fading = List.map (fun x -> let percent = x.remaining /. Moonshot.explosion_time in
                                   let r = Moonshot.explosion_radius /. 2.0 in
-                                  {remaining=x.remaining -. delta;
-                                   body={x.body with mass= percent *. Moonshot.explosion_mass;
-                                                     radius= r +. r *. percent}}) fading in
+                                  {x with
+                                    remaining=x.remaining -. delta;
+                                    body={x.body with mass= percent *. Moonshot.explosion_mass;
+                                                      radius= r +. r *. percent}}) fading in
   let fading = List.filter (fun x -> x.remaining > 0.0) fading in
   let movables = List.map (update_bullet delta static (body_set ~fading ~static ())) bullets in
   let in_any_static b1 = List.exists (fun b2 -> bodies_touch b1.moving.body b2)
@@ -333,15 +374,19 @@ let update_playing delta model =
   let create_explosions = List.map (fun (_, a) -> a) create_explosions in
   let fading = List.concat [fading; create_explosions] in
   let player = update_player delta (body_set ~fading ~static ()) static fading player in
-  let player_bullets = create_player_bullets runtime player in
+  let new_power, powerups = update_powerups player powerups in
+  let special_shots = List.concat [special_shots; new_power] in
+  let special_shots, player_bullets = create_player_bullets special_shots runtime player in
   let shots_taken = shots_taken + List.length player_bullets in
   let new_bullets = List.concat [alive; player_bullets] in
   let enemies = update_enemies delta (body_set ~fading ~static ()) fading enemies in
   let living_enemies = List.filter (fun x -> Moonshot.Enemy.is_alive x) enemies in
   let cam = update_camera cam player in
   let runtime = if 0 = List.length living_enemies then runtime else runtime +. delta in
+  let static = update_planets static fading in
   update_playing_check_for_level_end
-    { model with bullets=new_bullets; fading; player; enemies; cam; runtime; shots_taken; longest_bullet }
+    { model with bullets=new_bullets; powerups; fading; player; enemies; cam;
+                 runtime; shots_taken; longest_bullet; special_shots; static }
 
 let update delta model =
   match model with

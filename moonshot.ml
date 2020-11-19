@@ -18,6 +18,19 @@ let font_size = ssize * 12 / 65
 let pixels_per_meter = float_of_int ssize /. 10.0
 let meters_per_pixel = 1.0 /. pixels_per_meter
 
+module Powerup = struct
+  type kind =
+    | Fireblast
+  type t = {
+      power : kind;
+      pos : Vector2.t;
+    }
+
+  let draw_size = function
+    | Fireblast -> 1.0
+
+end
+
 module Body = struct
   type surface_type =
     | Normal
@@ -25,6 +38,10 @@ module Body = struct
     | Sticky
     | Bouncy
     | Slippery
+
+  type bulletkind =
+    | Fireblast
+    | Normalblast
 
   type t = {
       pos: Vector2.t; (* in meters *)
@@ -34,6 +51,7 @@ module Body = struct
   type fading = {
       remaining: float; (* in seconds *)
       body: t;
+      explosion_kind : bulletkind;
     }
   type planet = {
       body: t;
@@ -44,6 +62,7 @@ module Body = struct
       body: t;
     }
   type bullet = {
+      kind : bulletkind;
       created_at : float;
       moving : moving;
     }
@@ -121,6 +140,8 @@ module Model = struct
       stars : Starfield.t;
       static : Body.planet list;
       bullets : Body.bullet list;
+      powerups : Powerup.t list;
+      special_shots : Powerup.kind list;
       fading : Body.fading list;
       player : Player.t;
       enemies : Enemy.t list;

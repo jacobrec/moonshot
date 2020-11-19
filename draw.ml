@@ -194,6 +194,15 @@ let draw_planet p =
     | Body.Normal  -> color, color in
   draw_blocky_circle px py pr color_inner color_outer
 
+let draw_powerup powerup =
+  let { Powerup.power=power; pos } = powerup in
+  let x, y = sofwv pos in
+  let size = float_of_int @@ sofw @@ Powerup.draw_size power in
+  let gfx = match power with
+    | Powerup.Fireblast -> Color.red in
+
+  draw_circle x y size gfx
+
 let measure_text_wh text size =
   let f = get_font_default () in
   let base_size = Font.base_size f in
@@ -241,7 +250,8 @@ let draw_playing_starfield stars px py =
 
 let draw_playing model =
   let { Moonshot.Model.bullets=movables; static; fading;
-        player={animation_state=ani; feet=pfeet; head=phead; input=inp; health; _}; enemies; cam; runtime; _} = model in
+        player={animation_state=ani; feet=pfeet; head=phead; input=inp; health; _}; powerups;
+        enemies; cam; runtime; _} = model in
   let player = model.player in
   begin_drawing ();
   clear_background Color.black;
@@ -258,6 +268,9 @@ let draw_playing model =
                       if Moonshot.debug_draw then
                         draw_body Color.gray x.moving.body
     ) movables;
+
+  (* Draw powerups *)
+  List.iter draw_powerup powerups;
 
   List.iter draw_explosion fading;
   (* Draw Player*)
