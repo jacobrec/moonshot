@@ -137,13 +137,32 @@ let draw_blocky_circle x y r ci co =
     lerp r1 r2 x, lerp g1 g2 x, lerp b1 b2 x, lerp a1 a2 x in
 
   let tuple_color (r, g, b, a) = Color.create r g b a in
+
+  let variance = 10 in
+  let calc_for_stripes x =
+        (x/10) mod 10 in
+  let calc_for_specals x =
+    let xf = float_of_int x in
+    int_of_float ((float_of_int variance) *. Float.sin xf) in
+  let calc_for_slights x =
+    let xf = float_of_int x in
+    let ans = (Float.sin (xf *. 2.0) +. Float.sin (xf *. Float.pi)) in
+    int_of_float ((float_of_int variance) *. ans) in
+  let calc_for_noise x =
+        let fx = float_of_int x in
+        let rand = Noise.get fx in
+        int_of_float @@ (rand *. (float_of_int variance)) in
   let shake_color seed (r, g, b, a) =
     let seed = seed + r + g + b in
-    let variance = 10 in
     let calc_random x =
-      let fx = float_of_int x in
-      let rand = Noise.get fx in
-      int_of_float @@ (rand *. (float_of_int variance)) in
+      if r mod 2 = 0 then
+        calc_for_noise x
+      else if r mod 3 = 0 then
+        calc_for_specals x
+      else if r mod 5 = 0 then
+        calc_for_slights x
+      else
+        calc_for_stripes x in
     let bound_rand upper seed value = min (max (value + (calc_random seed) - variance / 2) 0) upper in
     let h, s, v = Colorutils.hsv_of_rgb (r, g, b) in
     let r', g', b' = Colorutils.rgb_of_hsv (h, bound_rand 99 seed s, v) in
