@@ -98,6 +98,7 @@ let draw_enemy e =
   let open Moonshot.Enemy in
   let c, t = match e.action with
     | Dead _ -> Color.darkblue, Images.get Images.EnemyDead
+    | Shielded -> Color.skyblue, Images.get_animation Images.EnemyStanding
     | _ -> Color.blue, Images.get_animation Images.EnemyStanding in
 
   let size = 2.0 in

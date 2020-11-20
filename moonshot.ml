@@ -1,6 +1,6 @@
 open Raylib
 
-let debug_draw = false
+let debug_draw = true
 let true_draw = true
 
 let damage_cooldown = 0.31
@@ -97,6 +97,7 @@ end
 module Enemy = struct
   type action =
     | Standing
+    | Shielded
     | Dead of float
 
   type t = {
