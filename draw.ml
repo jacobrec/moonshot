@@ -274,10 +274,10 @@ let draw_playing model =
         enemies; cam; runtime; _} = model in
   let player = model.player in
   begin_drawing ();
-  clear_background Color.black;
+  clear_background (if Moonshot.true_draw then Color.black else Color.raywhite);
   (* IDK if the starfield effect actually looks good*)
   let (px, py) = vector phead.body.pos in
-  draw_playing_starfield model.stars px py;
+  if Moonshot.true_draw then draw_playing_starfield model.stars px py;
   begin_mode_2d cam;
   List.iter draw_planet static;
 
