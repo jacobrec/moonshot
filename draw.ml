@@ -8,12 +8,6 @@ let draw_body color b =
   let pr = float_of_int @@ sofw r in
   draw_circle px py pr color
 
-let draw_explosion x =
-  let open Moonshot.Body in
-  let opacity = x.remaining /. explosion_time in
-  let c = Color.create 255 0 0 @@ int_of_float (255.0 *. opacity) in
-  draw_body c x.body
-
 let draw_dotted_line color max_length x1 y1 x2 y2 =
   let map4 f (a, b, c, d) = (f a, f b, f c, f d) in
   let (x1, y1, x2, y2) = map4 float_of_int (x1, y1, x2, y2) in
@@ -91,14 +85,21 @@ let draw_texture_hud text wloc size =
   let px, py = vector p in
   let p_off = (float_of_int tsize *. sf) /. 2.0 in
   let p = Vector2.create (px -. p_off) (py -. p_off) in
-
   if Moonshot.true_draw then draw_texture_ex text p 0.0 sf Color.white
+
+let draw_explosion x =
+  let open Moonshot.Body in
+  let opacity = x.remaining /. explosion_time in
+  let c = Color.create 255 0 0 @@ int_of_float (255.0 *. opacity) in
+  let timein = Moonshot.explosion_time -. x.remaining in
+  draw_texture (Images.get_animation ~time:timein Images.Explosion) x.body.pos 0.0 (2.0 *. x.body.radius);
+  if Moonshot.debug_draw then draw_body c x.body
 
 let draw_enemy e =
   let open Moonshot.Enemy in
   let c, t = match e.action with
     | Dead _ -> Color.darkblue, Images.get Images.EnemyDead
-    | Shielded -> Color.skyblue, Images.get_animation Images.EnemyStanding
+    | Shielded -> Color.skyblue, Images.get Images.EnemyIce
     | _ -> Color.blue, Images.get_animation Images.EnemyStanding in
 
   let size = 2.0 in
@@ -214,14 +215,18 @@ let draw_planet p =
     | Body.Normal  -> color, color in
   draw_blocky_circle px py pr color_inner color_outer
 
-let draw_powerup powerup =
+let draw_powerup static powerup =
   let { Powerup.power=power; pos } = powerup in
   let x, y = sofwv pos in
   let size = float_of_int @@ sofw @@ Powerup.draw_size power in
   let gfx = match power with
     | Powerup.Fireblast -> Color.red in
-
-  draw_circle x y size gfx
+  let b = {Body.mass=1.0; radius=size; pos} in
+  let open Body in
+  let fx, fy = Update.gravity_from_many b (List.map (fun x -> ignore(x.surface); x.body) static) in
+  let ang = Float.atan2 fy fx in
+  draw_texture (Images.get_animation Images.PowerupFire) pos ang (size /. 2.0);
+  if Moonshot.debug_draw then draw_circle x y size gfx
 
 let measure_text_wh text size =
   let f = get_font_default () in
@@ -283,14 +288,17 @@ let draw_playing model =
 
   (* Draw bullets *)
   List.iter (fun x -> let open Moonshot.Body in
-                      draw_texture (Images.get_animation Images.BulletFlying)
+                      let text = match x.kind with
+                        | Fireblast -> Images.BulletFire
+                        | Normalblast -> Images.BulletFlying in
+                      draw_texture (Images.get_animation text)
                         x.moving.body.pos 0.0 (2.0 *. x.moving.body.radius);
                       if Moonshot.debug_draw then
                         draw_body Color.gray x.moving.body
     ) movables;
 
   (* Draw powerups *)
-  List.iter draw_powerup powerups;
+  List.iter (draw_powerup static) powerups;
 
   List.iter draw_explosion fading;
   (* Draw Player*)
