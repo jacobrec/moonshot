@@ -38,23 +38,23 @@ open Moonshot
  * 2-8) Bouncy Planet II
  * 2-9) Bouncy Planet III
  * 2-10) Challenge
- * 2-11) ???
- * 2-12) ???
+ * 2-11) Challenge II
+ * 2-12) Challenge III
  *
  * World 3: Hawth: The icy world
  * Introduce icy planets, fire shot powerup, icy enemies
  * 3-1) Slippin
- * 3-2) ???
- * 3-3) ???
- * 3-4) ???
- * 3-5) ???
- * 3-6) ???
- * 3-7) ???
- * 3-8) ???
- * 3-9) ???
- * 3-10) ???
- * 3-11) ???
- * 3-12) ???
+ * 3-2) Slipping II
+ * 3-3) Slipping III
+ * 3-4) Melting I
+ * 3-5) Melting II
+ * 3-6) Melting III
+ * 3-7) New Enemy I
+ * 3-8) New Enemy II
+ * 3-9) New Enemy III
+ * 3-10) Challenge
+ * 3-11) Challenge II
+ * 3-12) Challenge III
 *)
 
 let vc = Raylib.Vector2.create
@@ -69,6 +69,10 @@ let world_names = [
 let make_slime x y =
   {Enemy.loc={Body.body={Body.pos=vc x y; mass=1.0; radius=1.0;};
               vel=vc 0.0 0.0}; action=Standing; angle=0.0}
+let make_ice_slime x y =
+  {Enemy.loc={Body.body={Body.pos=vc x y; mass=1.0; radius=1.0;};
+              vel=vc 0.0 0.0}; action=Shielded; angle=0.0}
+
 
 let make_level ?(powerups=[]) id name start_text px py bodies enemies star_reqs =
   let movables = [] in
@@ -592,6 +596,91 @@ let () = (* Level 5 *)
   make_level 205 "Five" ~powerups
     "Ice is slippery, if you go to fast, you may lose your footing"
     (93.0) 30.0 bodies enemies {health=6; time=10.0; shots=2}
+
+let () = (* Level 6 *)
+  let bodies = [
+      {Body.surface=Body.Normal; body={Body.pos=vc 300.0 300.0; mass=550.0; radius=8.0;}};
+      {Body.surface=Body.Slippery; body={Body.pos=vc 330.0 300.0; mass=550.0; radius=8.0;}};
+      {Body.surface=Body.Sticky; body={Body.pos=vc 360.0 300.0; mass=550.0; radius=6.5;}};
+
+      {Body.surface=Body.Normal; body={Body.pos=vc 430.0 305.0; mass= -750.0; radius=6.5;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 400.0 310.0; mass=550.0; radius=2.5;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 415.0 300.0; mass=550.0; radius=4.5;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 400.0 295.0; mass=50.0; radius=10.0;}};
+    ] in
+  let enemies = [make_slime 419.5 300.0] in
+  let powerups = [
+      {Powerup.power=Powerup.Fireblast; pos=vc 90.0 55.0};
+    ] in
+  make_level 206 "Six" ~powerups
+    "TODO: Level text"
+    (300.0) 308.0 bodies enemies {health=6; time=7.0; shots=1}
+
+let () = (* Level 7 *)
+  let bodies = [
+      {Body.surface=Body.Normal; body={Body.pos=vc 300.0 300.0; mass=550.0; radius=8.0;}};
+    ] in
+  let enemies = [make_ice_slime 308.0 300.0; make_slime 307.0 298.0] in
+  let powerups = [
+      {Powerup.power=Powerup.Fireblast; pos=vc 300.0 291.0};
+    ] in
+  make_level 207 "Seven" ~powerups
+    "Icy enemies have hard armor that needs to be melted. Fire shots will not be enough to kill a slime though"
+    (300.0) 308.0 bodies enemies {health=6; time=5.0; shots=2}
+
+let () = (* Level 8 *)
+  let bodies = [
+      {Body.surface=Body.Slippery; body={Body.pos=vc 300.0 300.0; mass=550.0; radius=8.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 340.0 300.0; mass=550.0; radius=8.0;}};
+    ] in
+  let enemies = [make_ice_slime 250.0 300.0;
+                 make_slime 348.0 300.0] in
+  let powerups = [
+      {Powerup.power=Powerup.Fireblast; pos=vc 300.0 291.0};
+    ] in
+  make_level 208 "Eight" ~powerups
+    ""
+    (300.0) 308.0 bodies enemies {health=6; time=12.0; shots=3}
+
+
+let () = (* Level 9 *)
+  let px = 300.0 in
+  let py = 300.0 in
+  let pr = 4.0 in
+  let ploc theta =
+    let theta = (float_of_int theta) *. Float.pi /. 180.0 in
+    let r = pr +. 1.5 in
+    let x = px +. r *. Float.cos theta in
+    let y = py +. r *. Float.sin theta in
+    {Powerup.power=Powerup.Fireblast; pos=vc x y} in
+
+  let eloc r theta t =
+    let r = float_of_int r in
+    let theta = (float_of_int theta) *. Float.pi /. 180.0 in
+    let x = px +. r *. Float.cos theta in
+    let y = py +. r *. Float.sin theta in
+    (if t then make_ice_slime else make_slime) x y in
+
+  let bodies = [
+      {Body.surface=Body.Slippery; body={Body.pos=vc px py; mass=350.0; radius=pr;}};
+    ] in
+
+  let powerups = [
+      ploc 0;
+      ploc 180;
+      ploc 270;
+    ] in
+  let enemies = [
+      (* radius angle[degrees] *)
+      eloc 40 90 true;
+      eloc 45 45 true;
+      eloc 65 135 false;
+      eloc 85 180 false;
+      eloc 85 0 false;
+    ] in
+  make_level 209 "Nine" ~powerups
+    "Make sure not to waste powerups by missing"
+    (300.0) 308.0 bodies enemies {health=6; time=15.0; shots=8}
 
 end
 

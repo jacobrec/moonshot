@@ -8,7 +8,7 @@ let explosion_time = 0.3
 let explosion_mass = -100.0
 let explosion_radius = 3.0
 
-let aim_assist_dots = 50
+let aim_assist_dots = 5
 
 let ssize = 75
 let screen_width = 16 * ssize
@@ -97,6 +97,7 @@ end
 module Enemy = struct
   type action =
     | Standing
+    | Shielded
     | Dead of float
 
   type t = {

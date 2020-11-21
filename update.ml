@@ -247,11 +247,18 @@ let update_bullet delta static bodies bullet =
 let update_enemies delta bodies fading enemies =
   let open Moonshot.Enemy in
   let open Moonshot.Body in
-  let in_any_explosion b1 = List.exists (fun b2 -> ignore(b2.remaining);
+  let in_explosions b1 = List.filter (fun b2 -> ignore(b2.remaining);
                                                    bodies_touch b1.loc.body b2.body) fading in
+  let in_explosion_kind b t =
+    let explos = in_explosions b in
+    List.exists (fun x -> x.explosion_kind = t) explos in
   let on_a_planet b1 = List.exists (fun b2 -> bodies_touch b1.loc.body b2) bodies in
-  let enemies = List.map (fun x -> if in_any_explosion x then (* check if dead *)
-                                     {x with action=Dead 2.0} else x) enemies in
+  let enemies = List.map (fun x -> (* check explosion status *)
+                    if x.action=Standing && in_explosion_kind x Body.Normalblast then
+                      {x with action=Dead 2.0}
+                    else if x.action=Shielded && in_explosion_kind x Body.Fireblast then
+                      {x with action=Standing}
+                    else x) enemies in
   let enemies = List.map (fun x -> {x with action=(match x.action with (* update death time *)
                                                    | Dead y -> Dead (y -. delta)
                                                    | _ -> x.action)}) enemies in
