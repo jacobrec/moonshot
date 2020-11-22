@@ -209,6 +209,7 @@ let explosion_from_body time x =
   let t = time -. x.created_at in
   let kind = x.kind in
   let x = x.moving in
+  play_sound Moonshot.explosion_sound;
   match kind with
   | Normalblast ->
      (t, {remaining=Moonshot.explosion_time;
