@@ -8,6 +8,7 @@ let explosion_time = 0.3
 let explosion_mass = -100.0
 let explosion_radius = 3.0
 let explosion_sound = load_sound "sound/explosion.wav"
+let jump_sound = load_sound "sound/jump.wav"
 
 let aim_assist_dots = 5
 

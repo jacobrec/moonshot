@@ -100,7 +100,7 @@ let update_planet_collidable ?(inp=None) ?(slipping=false) ?(no_forces=false) de
                     match inp with
                     | Moonshot.Player.CW -> (vpar, input_force)
                     | Moonshot.Player.CCW -> (vpar,-. input_force)
-                    | Moonshot.Player.Jump -> (vpar_jump -. jump_force, vper)
+                    | Moonshot.Player.Jump -> play_sound Moonshot.jump_sound; (vpar_jump -. jump_force, vper)
                     | _ -> (vpar, vper)
                in
 
