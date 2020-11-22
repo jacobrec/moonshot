@@ -1,6 +1,7 @@
 open Raylib
 open Moonshot
 
+
 let input_mouse_or_touch _ =
   if true then
     ((is_mouse_button_down MouseButton.Left), get_mouse_position ())
