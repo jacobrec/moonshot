@@ -112,14 +112,17 @@ let draw_player ani pfeet phead =
   let (pxh, pyh) = vector phead.body.pos in
   let (pxf, pyf) = vector pfeet.body.pos in
   let p_angr = Float.atan2 (pyf -. pyh) (pxf -. pxh) in
-  let size = 3.5 in
+  let size = 4.0 in
   let tex = match ani with
     | Player.Standing -> (Images.get Images.PlayerStanding)
     | Player.Walking -> Images.get_animation Images.PlayerWalking
     | Player.WalkingReverse -> Images.get_animation Images.PlayerWalkingReverse
     | Player.Falling -> Images.get_animation Images.PlayerFalling in
+  let px = (pxh +. pxf) /. 2.0 in
+  let py = (pyh +. pyf) /. 2.0 in
+  let p = Vector2.create px py in
 
-  draw_texture tex phead.body.pos p_angr size;
+  draw_texture tex p p_angr size;
   if Moonshot.debug_draw then
     List.iter (draw_body Color.lime) @@ List.map (fun x -> x.body) [phead; pfeet]
 

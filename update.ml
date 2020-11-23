@@ -3,7 +3,7 @@ open Moonshot
 
 let gravity' m1 m2 r =
   let _g = 6.6743e-11 in
-  let g = 10.0 in
+  let g = Moonshot.gravitational_constant in
   g *. (m1 *. m2) /. (r *. r)
 
 
@@ -164,7 +164,7 @@ let update_player delta bodies static fading player =
 
   (* Calculate new float *)
   let gravity_dir = -.Float.pi /.2.0  -. Float.atan2 b_fx b_fy in
-  let seperation = 1.0 in
+  let seperation = 2.0 in
   Vector2.set_x new_f.body.pos ((Vector2.x new_b.body.pos) +. seperation *. Float.cos gravity_dir);
   Vector2.set_y new_f.body.pos ((Vector2.y new_b.body.pos) +. seperation *. Float.sin gravity_dir);
 

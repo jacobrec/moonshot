@@ -69,6 +69,9 @@ let world_names = [
 let make_slime x y =
   {Enemy.loc={Body.body={Body.pos=vc x y; mass=1.0; radius=1.0;};
               vel=vc 0.0 0.0}; action=Standing; angle=0.0}
+let make_moving_slime x y vx vy =
+  {Enemy.loc={Body.body={Body.pos=vc x y; mass=1.0; radius=1.0;};
+              vel=vc vx vy}; action=Standing; angle=0.0}
 let make_ice_slime x y =
   {Enemy.loc={Body.body={Body.pos=vc x y; mass=1.0; radius=1.0;};
               vel=vc 0.0 0.0}; action=Shielded; angle=0.0}
@@ -81,9 +84,9 @@ let make_level ?(powerups=[]) id name start_text px py bodies enemies star_reqs 
   let make_player x y =
     {
       Player.feet={
-        Body.body={pos=vc x y; mass=  10.0; radius=0.5;}; vel=vc 0.0 0.0};
+        Body.body={pos=vc x y; mass=  10.0; radius=1.0;}; vel=vc 0.0 0.0};
       Player.head={
-          Body.body={pos=vc x (y +. 1.0); mass= -3.5; radius=0.5;}; vel=vc 0.0 0.0};
+          Body.body={pos=vc x (y +. 1.0); mass= -3.5; radius=1.0;}; vel=vc 0.0 0.0};
       input=Player.None;
       Player.health=6;
       animation_state=Player.Standing;
@@ -116,7 +119,7 @@ let make_level ?(powerups=[]) id name start_text px py bodies enemies star_reqs 
 let () =
   let bodies = [] in
   let enemies = [] in
-  make_level 0 "404" "Level not found" 0.0 0.0 bodies enemies {health=8; time=0.0; shots=0}
+  make_level 0 "404" "Level not found" 0.0 0.0 bodies enemies {health=8; time= -10.0; shots= -1}
 let blank_level = Hashtbl.find level_map 0
 
 
@@ -681,6 +684,28 @@ let () = (* Level 9 *)
   make_level 209 "Nine" ~powerups
     "Make sure not to waste powerups by missing"
     (300.0) 308.0 bodies enemies {health=6; time=15.0; shots=8}
+
+let () = (* Level 10 *)
+  let orbital_velocity planet_mass at_distance =
+    Float.sqrt (Moonshot.gravitational_constant *. planet_mass /. at_distance) in
+  let heavy = 100.0 in
+  let ob = 3.0 in
+  let bodies = [
+      {Body.surface=Body.Sticky; body={Body.pos=vc 300.0 300.0; mass=10.0; radius=1.0;}};
+      {Body.surface=Body.Normal; body={Body.pos=vc 340.0 300.0; mass=heavy; radius=1.0;}};
+    ] in
+  let enemies = [
+      make_moving_slime 340.0 (300.0 +. ob) (orbital_velocity heavy ob) 0.0;
+      make_moving_slime 340.0 (300.0 -. ob) (-. orbital_velocity heavy ob) 0.0;
+      make_moving_slime (340.0 +. ob) 300.0 0.0 (orbital_velocity heavy ob);
+      make_moving_slime (340.0 -. ob) 300.0 0.0 (-. orbital_velocity heavy ob);
+    ] in
+  let powerups = [
+    ] in
+  make_level 210 "Ten" ~powerups
+    ""
+    (300.0) 303.0 bodies enemies {health=6; time=3.0; shots=1}
+
 
 end
 
