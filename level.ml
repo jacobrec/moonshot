@@ -703,8 +703,53 @@ let () = (* Level 10 *)
   let powerups = [
     ] in
   make_level 210 "Ten" ~powerups
-    ""
+    "TODO: Level text"
     (300.0) 303.0 bodies enemies {health=6; time=3.0; shots=1}
+
+let () = (* Level 11 *)
+  let bodies = [
+      {Body.surface=Body.Slippery; body={Body.pos=vc 300.0 300.0; mass=300.0; radius=5.0;}};
+      {Body.surface=Body.Slippery; body={Body.pos=vc 300.0 355.0; mass=300.0; radius=5.0;}};
+      {Body.surface=Body.Slippery; body={Body.pos=vc 250.0 355.0; mass=300.0; radius=5.0;}};
+      {Body.surface=Body.Slippery; body={Body.pos=vc 200.0 355.0; mass=300.0; radius=5.0;}};
+      {Body.surface=Body.Slippery; body={Body.pos=vc 200.0 300.0; mass=300.0; radius=5.0;}};
+    ] in
+  let enemies = [
+      make_slime 200.0 300.0;
+    ] in
+  let powerups = [
+    ] in
+  make_level 211 "Eleven" ~powerups
+    "Is that some planets way out in the distance, hidden out of sight?"
+    (300.0) 303.0 bodies enemies {health=6; time=5.0; shots=1}
+
+let () = (* Level 12 *)
+    let bodies = [
+        {Body.surface=Body.Normal; body={Body.pos=vc (-15.0) (  0.0); mass=500.0; radius=7.0;}};
+        {Body.surface=Body.Sticky; body={Body.pos=vc ( 15.0) ( 15.0); mass=500.0; radius=7.0;}};
+        {Body.surface=Body.Sticky; body={Body.pos=vc ( 15.0) (-15.0); mass=500.0; radius=7.0;}};
+        {Body.surface=Body.Slippery; body={Body.pos=vc ( 30.0) (  0.0); mass=500.0; radius=7.0;}};
+        {Body.surface=Body.Normal; body={Body.pos=vc (-55.0) (  0.0); mass=300.0; radius=2.0;}};
+        {Body.surface=Body.Normal; body={Body.pos=vc ( 50.0) (  0.0); mass=200.0; radius=4.0;}};
+        {Body.surface=Body.Normal; body={Body.pos=vc ( 70.0) (  0.0); mass=200.0; radius=4.0;}};
+        {Body.surface=Body.Bouncy; body={Body.pos=vc ( 85.0) (  7.0); mass=200.0; radius=4.0;}};
+        {Body.surface=Body.Normal; body={Body.pos=vc (100.0) ( 14.0); mass=200.0; radius=4.0;}};
+        {Body.surface=Body.Bouncy; body={Body.pos=vc (110.0) ( 25.0); mass=200.0; radius=4.0;}};
+        {Body.surface=Body.Normal; body={Body.pos=vc (120.0) ( 38.0); mass=200.0; radius=4.0;}};
+        {Body.surface=Body.Bouncy; body={Body.pos=vc (125.0) ( 55.0); mass=200.0; radius=4.0;}};
+      ] in
+    let enemies = [
+        make_ice_slime (-58.0) 0.0;
+        make_slime (0.4) 0.0;
+        make_slime 25.0 6.5;
+        make_slime 125.0 60.0;
+        make_slime 100.0 20.0;
+      ] in
+    let powerups = [{Powerup.power=Powerup.Fireblast; pos=vc 120.0 42.0}] in
+    make_level 212 "Twelve" ~powerups
+      "The final level! Did you get 3 stars on everything yet?"
+      (-30.0) 0.0 bodies enemies {health=6; time=75.0; shots=5}
+
 
 
 end
