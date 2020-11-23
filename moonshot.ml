@@ -1,6 +1,7 @@
 open Raylib
 
 let debug_draw = false
+let touch_draw = false
 let true_draw = true
 
 let damage_cooldown = 0.31
