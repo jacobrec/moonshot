@@ -40,7 +40,7 @@ let get_animation_frame time ani =
     | BulletFlying -> (0.08, 8)
     | BulletFire -> (0.08, 9)
     | Explosion -> (0.06, 7)
-    | PowerupFire -> (0.1, 6)
+    | PowerupFire -> (0.1, 4)
     | PlayerFalling -> (0.2, 2)
   in
   let t = if time < 0.0 then Raylib.get_time () else time in
