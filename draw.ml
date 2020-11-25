@@ -647,6 +647,18 @@ let draw_worldselect _ =
   end_drawing () ;
   Model.WorldSelect
 
+let star_cache = Hashtbl.create 12
+let update_stars_cache i =
+  let data = Savedata.level i in
+  Hashtbl.add star_cache i (get_time () +. 5.0 +. Random.float 1.0, data);
+  data
+let cached_savedata_stars i =
+  let v = Hashtbl.find_opt star_cache i in
+  let data = match v with
+    | None -> update_stars_cache i
+    | Some (t, d) -> if (get_time ()) > t then update_stars_cache i else d in
+  data
+
 let draw_levelselect w =
   let f_color = Color.raywhite in
   let b_color = Color.black in
@@ -687,7 +699,7 @@ let draw_levelselect w =
   let keys = ["1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "0"; "-"; "="] in
   List.iter
     (fun level ->
-      let s1, s2, s3 = Savedata.level (w - 100 + level) in
+      let s1, s2, s3 = cached_savedata_stars (w - 100 + level) in
       let star b = if b then "*" else "-" in
       (if level mod 2 = 1 then ldl else ldr)
         ~centered:false
